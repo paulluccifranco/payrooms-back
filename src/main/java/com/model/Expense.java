@@ -15,6 +15,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "expenses")
 public class Expense {
@@ -36,10 +38,12 @@ public class Expense {
 
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH })
 	@JoinColumn(name = "user_id")
+	@JsonBackReference
 	private User user;
 
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH })
 	@JoinColumn(name = "room_id")
+	@JsonBackReference
 	private Room room;
 
 	public Expense() {
@@ -88,6 +92,10 @@ public class Expense {
 
 	public User getUser() {
 		return user;
+	}
+
+	public int getUserId() {
+		return this.getUser().getId();
 	}
 
 	public void setUser(User user) {

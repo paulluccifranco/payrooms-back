@@ -1,16 +1,16 @@
 package com.modelJson;
 
-public class JsonResponse {
+public class UserResponse {
 
 	private int id;
 	private String username;
 	private String token;
 
-	public JsonResponse() {
+	public UserResponse() {
 		super();
 	}
 
-	public JsonResponse(int id, String username, String token) {
+	public UserResponse(int id, String username, String token) {
 		super();
 		this.id = id;
 		this.username = username;

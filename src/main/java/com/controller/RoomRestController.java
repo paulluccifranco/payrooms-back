@@ -18,7 +18,7 @@ import com.model.CoverPage;
 import com.model.Expense;
 import com.model.Room;
 import com.model.User;
-import com.modelJson.JsonResponse;
+import com.modelJson.UserResponse;
 import com.modelJson.RoomDto;
 import com.service.CoverPageService;
 import com.service.RoomService;
@@ -75,8 +75,8 @@ public class RoomRestController {
 	}
 
 	@PostMapping("/rooms")
-	public JsonResponse addRoom(@RequestBody RoomDto roomDto) {
-		JsonResponse response = new JsonResponse(0, "Problemas al crear la sala", null);
+	public UserResponse addRoom(@RequestBody RoomDto roomDto) {
+		UserResponse response = new UserResponse(0, "Problemas al crear la sala", null);
 		CoverPage coverpage = coverPageService.findCoverPageById(roomDto.getCoverPage());
 		User owner = userService.findUserById(roomDto.getOwner());
 

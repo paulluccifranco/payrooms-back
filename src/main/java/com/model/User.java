@@ -15,7 +15,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 @Entity
 @Table(name = "users")
@@ -29,13 +31,14 @@ public class User {
 	@Column(name = "user_name", length = 45)
 	private String name;
 
-	@Column(name = "user_lastname")
+	@Column(name = "user_lastname", length = 45)
 	private String lastname;
 
 	@Column(name = "user_username", length = 45, nullable = false)
 	private String username;
 
 	@Column(name = "user_password", nullable = false)
+	@JsonProperty(access = Access.WRITE_ONLY)
 	private String password;
 
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH })
@@ -44,16 +47,16 @@ public class User {
 
 	@OneToMany(mappedBy = "owner", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
 			CascadeType.REFRESH })
-	@JsonIgnore
+	@JsonBackReference
 	private List<Room> ownRooms;
 
 	@ManyToMany(mappedBy = "users")
-	@JsonIgnore
+	@JsonBackReference
 	private List<Room> rooms;
 
 	@OneToMany(mappedBy = "user", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
 			CascadeType.REFRESH })
-	@JsonIgnore
+	@JsonBackReference
 	private List<Expense> expenses;
 
 	@Column(name = "user_state")

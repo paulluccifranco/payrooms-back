@@ -19,7 +19,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "rooms")
@@ -42,16 +42,17 @@ public class Room {
 
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH })
 	@JoinColumn(name = "user_id")
+	@JsonManagedReference
 	private User owner;
 
 	@JoinTable(name = "rooms_users", joinColumns = @JoinColumn(name = "room_fk_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "user_fk_id", nullable = false))
 	@ManyToMany(cascade = CascadeType.ALL)
-	@JsonIgnore
+	@JsonManagedReference
 	private List<User> users;
 
 	@OneToMany(mappedBy = "room", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
 			CascadeType.REFRESH })
-	@JsonIgnore
+	@JsonManagedReference
 	private List<Expense> expenses;
 
 	@Column(name = "room_date")
@@ -169,14 +170,6 @@ public class Room {
 
 	public void setState(int state) {
 		this.state = state;
-	}
-
-	public CoverPage getCoverpage() {
-		return coverpage;
-	}
-
-	public void setCoverpage(CoverPage coverpage) {
-		this.coverpage = coverpage;
 	}
 
 	public Date getDate() {

@@ -23,7 +23,7 @@ import com.model.Avatar;
 import com.model.Expense;
 import com.model.Room;
 import com.model.User;
-import com.modelJson.JsonResponse;
+import com.modelJson.UserResponse;
 import com.modelJson.UserDto;
 import com.service.AvatarService;
 import com.service.UserService;
@@ -47,6 +47,12 @@ public class UserRestController {
 	public List<User> getUsersList() {
 
 		return usersService.findUsersList();
+	}
+
+	@GetMapping("/server")
+	public String server() {
+
+		return "Servidor 2";
 	}
 
 	@GetMapping("/users/{userId}")
@@ -86,9 +92,9 @@ public class UserRestController {
 	}
 
 	@PostMapping("/login")
-	public JsonResponse login(@RequestBody UserDto log) {
+	public UserResponse login(@RequestBody UserDto log) {
 		Boolean exist = true;
-		JsonResponse jwt = new JsonResponse(0, null, null);
+		UserResponse jwt = new UserResponse(0, null, null);
 		User user = usersService.findUserByUsername(log.getUsername());
 		if (user == null) {
 			jwt.setUsername("Usuario Inexistente");
@@ -99,7 +105,7 @@ public class UserRestController {
 			String pass = user.getPassword();
 			jwt.setUsername(user.getUsername());
 			if (log.getPassword().equals(pass)) {
-				String token = getJWTToken(log.getUsername());
+				String token = getJWTToken("" + user.getId());
 				jwt.setToken(token);
 				jwt.setId(user.getId());
 			} else {
@@ -113,16 +119,16 @@ public class UserRestController {
 	}
 
 	@PostMapping("/users")
-	public JsonResponse addUser(@RequestBody UserDto userDto) {
+	public UserResponse addUser(@RequestBody UserDto userDto) {
 		User user = usersService.findUserByUsername(userDto.getUsername());
-		JsonResponse response = new JsonResponse(0, "El usuario ya existe", null);
+		UserResponse response = new UserResponse(0, "El usuario ya existe", null);
 		if (user == null) {
 			Avatar avatar = avatarsService.findAvatarById(userDto.getAvatar());
 			user = new User(userDto.getName(), userDto.getLastname(), userDto.getUsername(), userDto.getPassword(),
 					avatar);
 
 			int id = usersService.saveUser(user);
-			String token = getJWTToken(user.getUsername());
+			String token = getJWTToken("" + user.getId());
 			response.setId(id);
 			response.setUsername("Ususario creado");
 			response.setToken(token);
@@ -156,11 +162,11 @@ public class UserRestController {
 		return "Deleted user id - " + userId;
 	}
 
-	private String getJWTToken(String username) {
+	private String getJWTToken(String userId) {
 		String secretKey = "mySecretKey";
 		List<GrantedAuthority> grantedAuthorities = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER");
 
-		String token = Jwts.builder().setId("expensesJWT").setSubject(username)
+		String token = Jwts.builder().setId("expensesJWT").setSubject(userId)
 				.claim("authorities",
 						grantedAuthorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
 				.setIssuedAt(new Date(System.currentTimeMillis()))

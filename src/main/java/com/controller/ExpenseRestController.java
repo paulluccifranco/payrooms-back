@@ -18,7 +18,7 @@ import com.model.Expense;
 import com.model.Room;
 import com.model.User;
 import com.modelJson.ExpenseDto;
-import com.modelJson.JsonResponse;
+import com.modelJson.UserResponse;
 import com.service.ExpenseService;
 import com.service.RoomService;
 import com.service.UserService;
@@ -54,8 +54,8 @@ public class ExpenseRestController {
 	}
 
 	@PostMapping("/expenses")
-	public JsonResponse addExpense(@RequestBody ExpenseDto expenseDto) {
-		JsonResponse response = new JsonResponse(0, "No se pudo crear la sala", null);
+	public UserResponse addExpense(@RequestBody ExpenseDto expenseDto) {
+		UserResponse response = new UserResponse(0, "No se pudo crear la sala", null);
 		Room room = roomService.findRoomById(expenseDto.getIdRoom());
 		User user = userService.findUserById(expenseDto.getIdUser());
 
