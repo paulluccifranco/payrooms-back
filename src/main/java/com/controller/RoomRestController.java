@@ -18,8 +18,8 @@ import com.model.CoverPage;
 import com.model.Expense;
 import com.model.Room;
 import com.model.User;
-import com.modelJson.UserResponse;
 import com.modelJson.RoomDto;
+import com.modelJson.UserResponse;
 import com.service.CoverPageService;
 import com.service.RoomService;
 import com.service.UserService;
@@ -95,6 +95,17 @@ public class RoomRestController {
 
 		return response;
 
+	}
+
+	@PutMapping("/rooms/{roomId}/{userId}")
+	public Room addUser(@PathVariable int roomId, @PathVariable int userId) {
+
+		User user = userService.findUserById(userId);
+		Room room = roomService.findRoomById(roomId);
+		room.addUsers(user);
+		roomService.saveRoom(room);
+
+		return room;
 	}
 
 	@PutMapping("/rooms")
