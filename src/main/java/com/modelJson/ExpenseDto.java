@@ -8,13 +8,15 @@ public class ExpenseDto {
 	private BigDecimal value;
 	private int idUser;
 	private int idRoom;
+	private String participants;
 
-	public ExpenseDto(String description, BigDecimal value, int idUser, int idRoom) {
+	public ExpenseDto(String description, BigDecimal value, int idUser, int idRoom, String participants) {
 		super();
 		this.description = description;
 		this.value = value;
 		this.idUser = idUser;
 		this.idRoom = idRoom;
+		this.participants = participants;
 	}
 
 	public String getDescription() {
@@ -47,6 +49,14 @@ public class ExpenseDto {
 
 	public void setValue(BigDecimal value) {
 		this.value = value;
+	}
+
+	public String getParticipants() {
+		return participants;
+	}
+
+	public void setParticipants(String participants) {
+		this.participants = participants;
 	}
 
 }

@@ -63,7 +63,8 @@ public class ExpenseRestController {
 			return response;
 		}
 
-		Expense expense = new Expense(expenseDto.getDescription(), expenseDto.getValue(), user, room);
+		Expense expense = new Expense(expenseDto.getDescription(), expenseDto.getValue(), user, room,
+				expenseDto.getParticipants());
 		expense.setId(0);
 
 		int id = expenseService.saveExpense(expense);

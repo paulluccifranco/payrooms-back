@@ -46,16 +46,20 @@ public class Expense {
 	@JsonBackReference
 	private Room room;
 
+	@Column(name = "expense_participants", length = 45)
+	private String participants;
+
 	public Expense() {
 		super();
 	}
 
-	public Expense(String description, BigDecimal value, User user, Room room) {
+	public Expense(String description, BigDecimal value, User user, Room room, String participants) {
 		super();
 		this.description = description;
 		this.value = value;
 		this.user = user;
 		this.room = room;
+		this.participants = participants;
 	}
 
 	public int getId() {
@@ -108,6 +112,14 @@ public class Expense {
 
 	public void setRoom(Room room) {
 		this.room = room;
+	}
+
+	public String getParticipants() {
+		return participants;
+	}
+
+	public void setParticipants(String participants) {
+		this.participants = participants;
 	}
 
 	@Override
