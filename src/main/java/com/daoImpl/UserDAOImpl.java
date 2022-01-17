@@ -42,6 +42,20 @@ public class UserDAOImpl implements UserDAO {
 	}
 
 	@Override
+	public List<User> findUsersByUsername(String usrn) {
+		Session currentSession = entityManager.unwrap(Session.class);
+		usrn = usrn + "%";
+
+		Query<User> query = currentSession.createQuery("from User WHERE username LIKE :usrn", User.class);
+		query.setParameter("usrn", usrn);
+
+		List<User> users = query.getResultList();
+
+		return users;
+
+	}
+
+	@Override
 	public User findUserById(int id) {
 		Session currentSession = entityManager.unwrap(Session.class);
 

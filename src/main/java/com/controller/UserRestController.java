@@ -23,8 +23,8 @@ import com.model.Avatar;
 import com.model.Expense;
 import com.model.Room;
 import com.model.User;
-import com.modelJson.UserResponse;
 import com.modelJson.UserDto;
+import com.modelJson.UserResponse;
 import com.service.AvatarService;
 import com.service.UserService;
 
@@ -47,6 +47,14 @@ public class UserRestController {
 	public List<User> getUsersList() {
 
 		return usersService.findUsersList();
+	}
+
+	@GetMapping("/users/list/{username}")
+	public List<User> getUsersByUsername(@PathVariable String username) {
+
+		List<User> users = usersService.findUsersByUsername(username);
+
+		return users;
 	}
 
 	@GetMapping("/server")

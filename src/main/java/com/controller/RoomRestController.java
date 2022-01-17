@@ -3,6 +3,8 @@ package com.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -98,14 +100,29 @@ public class RoomRestController {
 	}
 
 	@PutMapping("/rooms/{roomId}/{userId}")
-	public Room addUser(@PathVariable int roomId, @PathVariable int userId) {
-
+	public ResponseEntity<String> addUser(@PathVariable int roomId, @PathVariable int userId) {
 		User user = userService.findUserById(userId);
 		Room room = roomService.findRoomById(roomId);
-		room.addUsers(user);
-		roomService.saveRoom(room);
+		String response = "Usuario Agregado";
+		HttpStatus status = HttpStatus.OK;
+		try {
+			List<User> users = room.getUsers();
+			for (User usr : users) {
+				if (usr == user) {
+					response = "El usuario ya se encuentra en la sala";
+					status = HttpStatus.BAD_REQUEST;
+				} else {
+					room.addUsers(user);
+					roomService.saveRoom(room);
+				}
+			}
+		} catch (Exception ex) {
+			room.addUsers(user);
+			roomService.saveRoom(room);
+		}
 
-		return room;
+		return new ResponseEntity<String>(response, status);
+
 	}
 
 	@PutMapping("/rooms")
