@@ -53,6 +53,11 @@ public class Room {
 	@OneToMany(mappedBy = "room", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
 			CascadeType.REFRESH })
 	@JsonManagedReference
+	private List<Payment> roomPayments;
+
+	@OneToMany(mappedBy = "room", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+			CascadeType.REFRESH })
+	@JsonManagedReference
 	private List<Expense> expenses;
 
 	@Column(name = "room_date")
@@ -178,6 +183,35 @@ public class Room {
 
 	public void setDate(Date date) {
 		this.date = date;
+	}
+
+	public CoverPage getCoverpage() {
+		return coverpage;
+	}
+
+	public void setCoverpage(CoverPage coverpage) {
+		this.coverpage = coverpage;
+	}
+
+	public List<Payment> getRoomPayments() {
+		return roomPayments;
+	}
+
+	public void setRoomPayments(List<Payment> roomPayments) {
+		this.roomPayments = roomPayments;
+	}
+
+	public void addPayments(Payment thePayment) {
+		if (thePayment == null) {
+			expenses = new ArrayList<>();
+		}
+
+		roomPayments.add(thePayment);
+		User paymentPayer = thePayment.getPayer();
+		User paymentReciever = thePayment.getReciever();
+		paymentPayer.addPayed(thePayment);
+		paymentReciever.addRecieved(thePayment);
+
 	}
 
 	@Override

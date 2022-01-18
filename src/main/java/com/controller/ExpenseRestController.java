@@ -17,14 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.model.Expense;
 import com.model.Room;
 import com.model.User;
-import com.modelJson.ExpenseDto;
-import com.modelJson.UserResponse;
+import com.modelDtos.ExpenseDto;
+import com.modelDtos.UserResponse;
 import com.service.ExpenseService;
 import com.service.RoomService;
 import com.service.UserService;
 
 @RestController
-@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.PUT, RequestMethod.POST })
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.PUT, RequestMethod.POST,
+		RequestMethod.DELETE })
 @RequestMapping("/api/v1.0")
 
 public class ExpenseRestController {

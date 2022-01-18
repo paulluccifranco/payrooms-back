@@ -23,15 +23,16 @@ import com.model.Avatar;
 import com.model.Expense;
 import com.model.Room;
 import com.model.User;
-import com.modelJson.UserDto;
-import com.modelJson.UserResponse;
+import com.modelDtos.UserDto;
+import com.modelDtos.UserResponse;
 import com.service.AvatarService;
 import com.service.UserService;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
-@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST })
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+		RequestMethod.DELETE })
 @RestController
 @RequestMapping("/api/v1.0")
 
@@ -165,7 +166,9 @@ public class UserRestController {
 			throw new RuntimeException("Expense id not found -" + userId);
 		}
 
-		usersService.deleteUserById(userId);
+		user.setState(2);
+		user.setDate(new Date());
+		usersService.saveUser(user);
 
 		return "Deleted user id - " + userId;
 	}

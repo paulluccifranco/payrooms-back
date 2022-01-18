@@ -1,5 +1,6 @@
 package com.controller;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.model.CoverPage;
 import com.model.Expense;
+import com.model.Payment;
 import com.model.Room;
 import com.model.User;
-import com.modelJson.RoomDto;
-import com.modelJson.UserResponse;
+import com.modelDtos.RoomDto;
+import com.modelDtos.UserResponse;
 import com.service.CoverPageService;
 import com.service.RoomService;
 import com.service.UserService;
 
 @RestController
-@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.PUT, RequestMethod.POST })
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.PUT, RequestMethod.POST,
+		RequestMethod.DELETE })
 @RequestMapping("/api/v1.0")
 
 public class RoomRestController {
@@ -64,6 +67,16 @@ public class RoomRestController {
 			throw new RuntimeException("Room id not found -" + roomId);
 		}
 		return room.getUsers();
+	}
+
+	@GetMapping("/rooms/{roomId}/payments")
+	public List<Payment> getRoomUPayments(@PathVariable int roomId) {
+		Room room = roomService.findRoomById(roomId);
+
+		if (room == null) {
+			throw new RuntimeException("Room id not found -" + roomId);
+		}
+		return room.getRoomPayments();
 	}
 
 	@GetMapping("/rooms/{roomId}/expenses")
@@ -103,22 +116,33 @@ public class RoomRestController {
 	public ResponseEntity<String> addUser(@PathVariable int roomId, @PathVariable int userId) {
 		User user = userService.findUserById(userId);
 		Room room = roomService.findRoomById(roomId);
+		Boolean exist = false;
 		String response = "Usuario Agregado";
 		HttpStatus status = HttpStatus.OK;
 		try {
 			List<User> users = room.getUsers();
-			for (User usr : users) {
-				if (usr == user) {
+			if (users.size() > 0) {
+				for (User usr : users) {
+					if (usr == user) {
+						exist = true;
+						break;
+					}
+				}
+				if (exist) {
 					response = "El usuario ya se encuentra en la sala";
 					status = HttpStatus.BAD_REQUEST;
 				} else {
 					room.addUsers(user);
 					roomService.saveRoom(room);
+
 				}
+			} else {
+				room.addUsers(user);
+				roomService.saveRoom(room);
 			}
+
 		} catch (Exception ex) {
-			room.addUsers(user);
-			roomService.saveRoom(room);
+
 		}
 
 		return new ResponseEntity<String>(response, status);
@@ -142,7 +166,10 @@ public class RoomRestController {
 			throw new RuntimeException("Room id not found -" + roomId);
 		}
 
-		roomService.deleteRoom(roomId);
+		room.setState(1);
+		room.setDate(new Date());
+
+		roomService.saveRoom(room);
 
 		return "Deleted room id - " + roomId;
 	}

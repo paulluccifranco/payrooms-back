@@ -1,4 +1,4 @@
-package com.modelJson;
+package com.modelDtos;
 
 public class UserResponse {
 

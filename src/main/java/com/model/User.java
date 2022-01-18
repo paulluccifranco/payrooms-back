@@ -1,6 +1,7 @@
 package com.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -14,6 +15,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -61,6 +64,20 @@ public class User {
 
 	@Column(name = "user_state")
 	private int state = 1;
+
+	@Column(name = "user_date")
+	@UpdateTimestamp
+	private Date date;
+
+	@OneToMany(mappedBy = "reciever", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+			CascadeType.REFRESH })
+	@JsonBackReference
+	private List<Payment> paymentRecieved;
+
+	@OneToMany(mappedBy = "payer", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+			CascadeType.REFRESH })
+	@JsonBackReference
+	private List<Payment> paymentPayed;
 
 	public User() {
 		super();
@@ -177,6 +194,46 @@ public class User {
 
 	public void setState(int state) {
 		this.state = state;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public List<Payment> getPaymentRecieved() {
+		return paymentRecieved;
+	}
+
+	public void setPaymentRecieved(List<Payment> paymentRecieved) {
+		this.paymentRecieved = paymentRecieved;
+	}
+
+	public List<Payment> getPaymentPayed() {
+		return paymentPayed;
+	}
+
+	public void setPaymentPayed(List<Payment> paymentPayed) {
+		this.paymentPayed = paymentPayed;
+	}
+
+	public void addPayed(Payment payed) {
+		if (paymentPayed == null) {
+			paymentPayed = new ArrayList<>();
+		}
+
+		paymentPayed.add(payed);
+	}
+
+	public void addRecieved(Payment recieved) {
+		if (paymentRecieved == null) {
+			paymentRecieved = new ArrayList<>();
+		}
+
+		paymentRecieved.add(recieved);
 	}
 
 	@Override

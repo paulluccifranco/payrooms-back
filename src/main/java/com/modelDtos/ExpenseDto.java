@@ -1,4 +1,4 @@
-package com.modelJson;
+package com.modelDtos;
 
 import java.math.BigDecimal;
 
