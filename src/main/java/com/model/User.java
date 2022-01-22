@@ -2,7 +2,9 @@ package com.model;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -11,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -19,6 +22,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
@@ -56,6 +60,15 @@ public class User {
 	@ManyToMany(mappedBy = "users")
 	@JsonBackReference
 	private List<Room> rooms;
+
+	@ManyToMany(mappedBy = "friends")
+	@JsonBackReference
+	private Set<User> users;
+
+	@JoinTable(name = "users_friends", joinColumns = @JoinColumn(name = "user_fk_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "friend_fk_id", nullable = false))
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JsonManagedReference
+	private Set<User> friends;
 
 	@OneToMany(mappedBy = "user", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
 			CascadeType.REFRESH })
@@ -96,24 +109,6 @@ public class User {
 		this.username = username;
 		this.password = password;
 		this.avatar = avatar;
-	}
-
-	public void addRoom(Room theRoom) {
-		if (ownRooms == null) {
-			ownRooms = new ArrayList<>();
-		}
-
-		ownRooms.add(theRoom);
-
-		theRoom.setOwner(this);
-	}
-
-	public void addExpense(Expense theExpense) {
-		if (expenses == null) {
-			expenses = new ArrayList<>();
-		}
-
-		expenses.add(theExpense);
 	}
 
 	public int getId() {
@@ -180,12 +175,47 @@ public class User {
 		this.rooms = rooms;
 	}
 
+	public void addRoom(Room theRoom) {
+		if (ownRooms == null) {
+			ownRooms = new ArrayList<>();
+		}
+
+		ownRooms.add(theRoom);
+
+		theRoom.setOwner(this);
+	}
+
+	public Set<User> getFriends() {
+		return friends;
+	}
+
+	public void setFriends(Set<User> friends) {
+		this.friends = friends;
+	}
+
+	public void addFriend(User friend) {
+		if (friend == null) {
+			friends = new HashSet<>();
+		}
+
+		friends.add(friend);
+
+	}
+
 	public List<Expense> getExpenses() {
 		return expenses;
 	}
 
 	public void setExpenses(List<Expense> expenses) {
 		this.expenses = expenses;
+	}
+
+	public void addExpense(Expense theExpense) {
+		if (expenses == null) {
+			expenses = new ArrayList<>();
+		}
+
+		expenses.add(theExpense);
 	}
 
 	public int getState() {
