@@ -2,7 +2,11 @@ package com.controller;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +22,8 @@ import com.model.Expense;
 import com.model.Room;
 import com.model.User;
 import com.modelDtos.ExpenseDto;
-import com.modelDtos.UserResponse;
+import com.modelDtos.Response;
+import com.security.JsonWebTokenService;
 import com.service.ExpenseService;
 import com.service.RoomService;
 import com.service.UserService;
@@ -39,6 +44,9 @@ public class ExpenseRestController {
 	@Autowired
 	private RoomService roomService;
 
+	@Autowired
+	JsonWebTokenService jsonWebTokenService;
+
 	@GetMapping("/expenses")
 	public List<Expense> findAll() {
 		return expenseService.findExpenseList();
@@ -55,47 +63,81 @@ public class ExpenseRestController {
 	}
 
 	@PostMapping("/expenses")
-	public UserResponse addExpense(@RequestBody ExpenseDto expenseDto) {
-		UserResponse response = new UserResponse(0, "No se pudo crear la sala", null);
-		Room room = roomService.findRoomById(expenseDto.getIdRoom());
-		User user = userService.findUserById(expenseDto.getIdUser());
+	public ResponseEntity<Object> addExpense(@RequestBody ExpenseDto expenseDto) {
+		try {
+			Room room = roomService.findRoomById(expenseDto.getIdRoom());
+			User user = userService.findUserById(expenseDto.getIdUser());
 
-		if (user == null || room == null) {
-			return response;
+			if (user == null || room == null) {
+				Response response = new Response("Data not found", "Los datos no fueron encontrados");
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+			}
+
+			Expense expense = new Expense(expenseDto.getDescription(), expenseDto.getValue(), user, room,
+					expenseDto.getParticipants());
+			expense.setId(0);
+
+			int id = expenseService.saveExpense(expense);
+			Response response = new Response("Expense created id: " + id, "El gasto fue creado con exito");
+			return new ResponseEntity<>(response, HttpStatus.OK);
+
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+
 		}
-
-		Expense expense = new Expense(expenseDto.getDescription(), expenseDto.getValue(), user, room,
-				expenseDto.getParticipants());
-		expense.setId(0);
-
-		int id = expenseService.saveExpense(expense);
-		response.setId(id);
-		response.setUsername("Gasto Creado");
-
-		return response;
 
 	}
 
 	@PutMapping("/expenses")
-	public Expense updateExpense(@RequestBody Expense expense) {
+	public ResponseEntity<Object> updateExpense(HttpServletRequest request, @RequestBody Expense expense) {
+		try {
+			int userId = jsonWebTokenService.validateUserJWT(request);
+			if (userId == expense.getUserId()) {
+				expenseService.saveExpense(expense);
+				Response response = new Response("Expense edited", "El gasto fue editado con exito");
+				return new ResponseEntity<>(response, HttpStatus.OK);
+			} else {
+				Response response = new Response("User Id mismatch", "No tiene autorizacion para realizar esta accion");
+				return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+			}
 
-		expenseService.saveExpense(expense);
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
 
-		return expense;
+		}
+
 	}
 
 	@DeleteMapping("expenses/{expenseId}")
-	public String deteteExpense(@PathVariable int expenseId) {
+	public ResponseEntity<Object> deteteExpense(HttpServletRequest request, @PathVariable int expenseId) {
+		try {
+			int userId = jsonWebTokenService.validateUserJWT(request);
+			Expense expense = expenseService.findExpenseById(expenseId);
 
-		Expense expense = expenseService.findExpenseById(expenseId);
+			if (expense == null) {
+				Response response = new Response("Expense not found", "El gasto no existe");
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+			} else {
+				if (userId == expense.getUserId()) {
+					expenseService.deleteExpense(expenseId);
+					Response response = new Response("Espense deleted", "El gasto fue dado de baja");
+					return new ResponseEntity<>(response, HttpStatus.OK);
+				} else {
+					Response response = new Response("User Id mismatch",
+							"No tiene autorizacion para realizar esta accion");
+					return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+				}
 
-		if (expense == null) {
-			throw new RuntimeException("Expense id not found -" + expenseId);
+			}
+
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+
 		}
 
-		expenseService.deleteExpense(expenseId);
-
-		return "Deleted expense id - " + expenseId;
 	}
 
 }

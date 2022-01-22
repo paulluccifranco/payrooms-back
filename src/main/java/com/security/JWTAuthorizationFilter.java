@@ -30,7 +30,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
 		try {
-			if (existeJWTToken(request, response)) {
+			if (existJWTToken(request, response)) {
 				Claims claims = validateToken(request);
 				if (claims.get("authorities") != null) {
 					setUpSpringAuthentication(claims);
@@ -53,21 +53,6 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 		return Jwts.parser().setSigningKey(SECRET.getBytes()).parseClaimsJws(jwtToken).getBody();
 	}
 
-	private String getUsername(HttpServletRequest request) {
-		String token = request.getHeader(HEADER);
-		if (token != null) {
-			// Se procesa el token y se recupera el usuario.
-			String user = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token.replace(PREFIX, "")).getBody()
-					.getSubject();
-
-			if (user != null) {
-				return user;
-			}
-			return null;
-		}
-		return null;
-	}
-
 	/**
 	 * Metodo para autenticarnos dentro del flujo de Spring
 	 * 
@@ -75,7 +60,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 	 */
 	private void setUpSpringAuthentication(Claims claims) {
 		@SuppressWarnings("unchecked")
-		List<String> authorities = (List) claims.get("authorities");
+		List<String> authorities = (List<String>) claims.get("authorities");
 
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(claims.getSubject(), null,
 				authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
@@ -83,7 +68,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
 	}
 
-	private boolean existeJWTToken(HttpServletRequest request, HttpServletResponse res) {
+	private boolean existJWTToken(HttpServletRequest request, HttpServletResponse res) {
 		String authenticationHeader = request.getHeader(HEADER);
 		if (authenticationHeader == null || !authenticationHeader.startsWith(PREFIX))
 			return false;

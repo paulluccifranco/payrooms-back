@@ -2,6 +2,9 @@ package com.controller;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,8 +25,10 @@ import com.model.Expense;
 import com.model.Payment;
 import com.model.Room;
 import com.model.User;
+import com.modelDtos.Response;
 import com.modelDtos.RoomDto;
 import com.modelDtos.UserResponse;
+import com.security.JsonWebTokenService;
 import com.service.CoverPageService;
 import com.service.RoomService;
 import com.service.UserService;
@@ -44,6 +49,9 @@ public class RoomRestController {
 	@Autowired
 	private CoverPageService coverPageService;
 
+	@Autowired
+	JsonWebTokenService jsonWebTokenService;
+
 	@GetMapping("/rooms")
 	public List<Room> findAll() {
 		return roomService.findRoomsList();
@@ -60,7 +68,7 @@ public class RoomRestController {
 	}
 
 	@GetMapping("/rooms/{roomId}/users")
-	public List<User> getRoomUsers(@PathVariable int roomId) {
+	public Set<User> getRoomUsers(@PathVariable int roomId) {
 		Room room = roomService.findRoomById(roomId);
 
 		if (room == null) {
@@ -90,88 +98,105 @@ public class RoomRestController {
 	}
 
 	@PostMapping("/rooms")
-	public UserResponse addRoom(@RequestBody RoomDto roomDto) {
-		UserResponse response = new UserResponse(0, "Problemas al crear la sala", null);
-		CoverPage coverpage = coverPageService.findCoverPageById(roomDto.getCoverPage());
-		User owner = userService.findUserById(roomDto.getOwner());
+	public ResponseEntity<Object> addRoom(@RequestBody RoomDto roomDto) {
+		try {
+			CoverPage coverpage = coverPageService.findCoverPageById(roomDto.getCoverPage());
+			User owner = userService.findUserById(roomDto.getOwner());
 
-		if (owner == null || coverpage == null) {
-			return response;
+			if (owner == null || coverpage == null) {
+				Response response = new Response("Data not found", "Los datos no estan cargados en la base");
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+			}
+			Room room = new Room(roomDto.getName(), roomDto.getDescription(), coverpage, owner);
+			room.setId(0);
+
+			int id = roomService.saveRoom(room);
+
+			UserResponse userResponse = new UserResponse(id, "Sala creada", null);
+			return new ResponseEntity<>(userResponse, HttpStatus.OK);
+
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+
 		}
-		Room room = new Room(roomDto.getName(), roomDto.getDescription(), coverpage, owner);
-		room.setId(0);
-
-		int id = roomService.saveRoom(room);
-
-		if (id > 0) {
-			response.setId(id);
-			response.setUsername("Sala creada");
-		}
-
-		return response;
 
 	}
 
 	@PutMapping("/rooms/{roomId}/{userId}")
-	public ResponseEntity<String> addUser(@PathVariable int roomId, @PathVariable int userId) {
-		User user = userService.findUserById(userId);
-		Room room = roomService.findRoomById(roomId);
-		Boolean exist = false;
-		String response = "Usuario Agregado";
-		HttpStatus status = HttpStatus.OK;
+	public ResponseEntity<Object> addUser(@PathVariable int roomId, @PathVariable int userId) {
 		try {
-			List<User> users = room.getUsers();
-			if (users.size() > 0) {
-				for (User usr : users) {
-					if (usr == user) {
-						exist = true;
-						break;
-					}
-				}
-				if (exist) {
-					response = "El usuario ya se encuentra en la sala";
-					status = HttpStatus.BAD_REQUEST;
-				} else {
-					room.addUsers(user);
-					roomService.saveRoom(room);
-
-				}
+			User user = userService.findUserById(userId);
+			Room room = roomService.findRoomById(roomId);
+			if (room.getUsers().contains(user)) {
+				Response response = new Response("Duplicated user", "El usuario ya se encuentra en la base de datos");
+				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			} else {
 				room.addUsers(user);
 				roomService.saveRoom(room);
+				Response response = new Response("User added", "El usuario fue agregado satisfactoriamente");
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			}
 
 		} catch (Exception ex) {
-
+			Response response = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
 		}
-
-		return new ResponseEntity<String>(response, status);
 
 	}
 
 	@PutMapping("/rooms")
-	public Room updateRoom(@RequestBody Room room) {
+	public ResponseEntity<Object> updateRoom(HttpServletRequest request, @RequestBody Room room) {
+		try {
+			int userId = jsonWebTokenService.validateUserJWT(request);
+			if (userId == room.getOwner().getId()) {
+				roomService.saveRoom(room);
+				return new ResponseEntity<>(room, HttpStatus.OK);
+			} else {
+				Response response = new Response("User Id mismatch", "No tiene autorizacion para realizar esta accion");
+				return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+			}
 
-		roomService.saveRoom(room);
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
 
-		return room;
+		}
+
 	}
 
 	@DeleteMapping("rooms/{roomId}")
-	public String deteteRoom(@PathVariable int roomId) {
+	public ResponseEntity<Object> deteteRoom(HttpServletRequest request, @PathVariable int roomId) {
 
-		Room room = roomService.findRoomById(roomId);
+		try {
+			Room room = roomService.findRoomById(roomId);
 
-		if (room == null) {
-			throw new RuntimeException("Room id not found -" + roomId);
+			if (room == null) {
+				Response response = new Response("Room not found", "La sala no se encuentra en la base de datos");
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+			} else {
+				int userId = jsonWebTokenService.validateUserJWT(request);
+				if (userId == room.getOwner().getId()) {
+					room.setState(1);
+					room.setDate(new Date());
+
+					roomService.saveRoom(room);
+
+					Response response = new Response("Room state change", "La sala fue dada de baja con exito");
+					return new ResponseEntity<>(response, HttpStatus.OK);
+				} else {
+					Response response = new Response("User Id mismatch",
+							"No tiene autorizacion para realizar esta accion");
+					return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+				}
+
+			}
+
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+
 		}
-
-		room.setState(1);
-		room.setDate(new Date());
-
-		roomService.saveRoom(room);
-
-		return "Deleted room id - " + roomId;
 	}
 
 }

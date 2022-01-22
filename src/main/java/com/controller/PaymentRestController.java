@@ -18,7 +18,6 @@ import com.model.Payment;
 import com.model.Room;
 import com.model.User;
 import com.modelDtos.PaymentDto;
-import com.service.CoverPageService;
 import com.service.PaymentService;
 import com.service.RoomService;
 import com.service.UserService;
@@ -38,9 +37,6 @@ public class PaymentRestController {
 
 	@Autowired
 	private UserService userService;
-
-	@Autowired
-	private CoverPageService coverPageService;
 
 	@GetMapping("/payments/{paymentId}")
 	public Payment getPayment(@PathVariable int paymentId) {

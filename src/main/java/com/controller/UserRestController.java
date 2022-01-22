@@ -3,11 +3,12 @@ package com.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,13 +24,12 @@ import com.model.Avatar;
 import com.model.Expense;
 import com.model.Room;
 import com.model.User;
+import com.modelDtos.Response;
 import com.modelDtos.UserDto;
 import com.modelDtos.UserResponse;
+import com.security.JsonWebTokenService;
 import com.service.AvatarService;
 import com.service.UserService;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
 		RequestMethod.DELETE })
@@ -43,6 +43,9 @@ public class UserRestController {
 
 	@Autowired
 	private AvatarService avatarsService;
+
+	@Autowired
+	JsonWebTokenService jsonWebTokenService;
 
 	@GetMapping("/users")
 	public List<User> getUsersList() {
@@ -61,7 +64,7 @@ public class UserRestController {
 	@GetMapping("/server")
 	public String server() {
 
-		return "Servidor 2";
+		return "Servidor 1";
 	}
 
 	@GetMapping("/users/{userId}")
@@ -101,90 +104,107 @@ public class UserRestController {
 	}
 
 	@PostMapping("/login")
-	public UserResponse login(@RequestBody UserDto log) {
-		Boolean exist = true;
+	public ResponseEntity<Object> login(@RequestBody UserDto log) {
 		UserResponse jwt = new UserResponse(0, null, null);
 		User user = usersService.findUserByUsername(log.getUsername());
 		if (user == null) {
-			jwt.setUsername("Usuario Inexistente");
-			exist = false;
-		}
-
-		if (exist) {
+			Response response = new Response("User dont find", "Usuario Inexistente");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+		} else {
 			String pass = user.getPassword();
 			jwt.setUsername(user.getUsername());
 			if (log.getPassword().equals(pass)) {
-				String token = getJWTToken("" + user.getId());
+				String token = jsonWebTokenService.generateJWTToken("" + user.getId());
 				jwt.setToken(token);
 				jwt.setId(user.getId());
+				return new ResponseEntity<>(jwt, HttpStatus.OK);
 			} else {
-				jwt.setUsername("Pass Incorrecto");
+				Response response = new Response("Password not match", "Contraseña incorrecta");
+				return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
 			}
 
 		}
 
-		return jwt;
-
 	}
 
 	@PostMapping("/users")
-	public UserResponse addUser(@RequestBody UserDto userDto) {
-		User user = usersService.findUserByUsername(userDto.getUsername());
-		UserResponse response = new UserResponse(0, "El usuario ya existe", null);
-		if (user == null) {
-			Avatar avatar = avatarsService.findAvatarById(userDto.getAvatar());
-			user = new User(userDto.getName(), userDto.getLastname(), userDto.getUsername(), userDto.getPassword(),
-					avatar);
+	public ResponseEntity<Object> addUser(@RequestBody UserDto userDto) {
+		try {
+			User user = usersService.findUserByUsername(userDto.getUsername());
+			if (user == null) {
+				Avatar avatar = avatarsService.findAvatarById(userDto.getAvatar());
+				user = new User(userDto.getName(), userDto.getLastname(), userDto.getUsername(), userDto.getPassword(),
+						avatar);
 
-			int id = usersService.saveUser(user);
-			String token = getJWTToken("" + user.getId());
-			response.setId(id);
-			response.setUsername("Ususario creado");
-			response.setToken(token);
+				int id = usersService.saveUser(user);
+				String token = jsonWebTokenService.generateJWTToken("" + user.getId());
+				UserResponse response = new UserResponse(id, user.getUsername(), token);
+
+				return new ResponseEntity<>(response, HttpStatus.OK);
+			} else {
+				Response failResponse = new Response("Duplicated user", "El nombre de usuario ya existe");
+				return new ResponseEntity<>(failResponse, HttpStatus.BAD_REQUEST);
+			}
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 
-		return response;
 	}
 
 	@PutMapping("/users")
-	public User updateExpense(@RequestBody UserDto userDto) {
+	public ResponseEntity<Object> updateExpense(HttpServletRequest request, @RequestBody UserDto userDto) {
 
-		User user = usersService.findUserById(userDto.getId());
-		user.setName(userDto.getName());
+		try {
+			int userPayload = jsonWebTokenService.validateUserJWT(request);
+			if (userPayload == userDto.getId()) {
+				User user = usersService.findUserById(userDto.getId());
+				user.setName(userDto.getName());
 
-		usersService.saveUser(user);
+				usersService.saveUser(user);
 
-		return user;
+				return new ResponseEntity<>(user, HttpStatus.OK);
+			} else {
+				Response response = new Response("Corrupted token, User Id mismatch", "Cambio no permitido");
+				return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+			}
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+
 	}
 
 	@DeleteMapping("users/{userId}")
-	public String deteteExpense(@PathVariable int userId) {
+	public ResponseEntity<Object> deteteExpense(HttpServletRequest request, @PathVariable int userId) {
 
-		User user = usersService.findUserById(userId);
+		try {
+			int userPayload = jsonWebTokenService.validateUserJWT(request);
+			if (userId == userPayload) {
+				User user = usersService.findUserById(userId);
 
-		if (user == null) {
-			throw new RuntimeException("Expense id not found -" + userId);
+				if (user == null) {
+					Response response = new Response("Data not foun", "No se encuenta el usuario en la base de datos");
+					return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+				}
+
+				user.setState(2);
+				user.setDate(new Date());
+				usersService.saveUser(user);
+
+				Response response = new Response("User state change", "Usuario dado de baja");
+				return new ResponseEntity<>(response, HttpStatus.OK);
+			} else {
+				Response response = new Response("User Id mismatch", "No tiene autorizacion para realizar esta accion");
+				return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+			}
+
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+
 		}
 
-		user.setState(2);
-		user.setDate(new Date());
-		usersService.saveUser(user);
-
-		return "Deleted user id - " + userId;
-	}
-
-	private String getJWTToken(String userId) {
-		String secretKey = "mySecretKey";
-		List<GrantedAuthority> grantedAuthorities = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER");
-
-		String token = Jwts.builder().setId("expensesJWT").setSubject(userId)
-				.claim("authorities",
-						grantedAuthorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))
-				.signWith(SignatureAlgorithm.HS512, secretKey.getBytes()).compact();
-
-		return "Token " + token;
 	}
 
 }

@@ -1,31 +1,44 @@
 package com.modelDtos;
 
+import java.util.Date;
+
 public class Response {
 
-	private String messaje;
+	private String developerMessage;
 
-	private Object response;
+	private String userMessage;
 
-	public Response(String messaje, Object response) {
+	private Date time;
+
+	public Response(String developerMessage, String userMessage) {
 		super();
-		this.messaje = messaje;
-		this.response = response;
+		this.developerMessage = developerMessage;
+		this.userMessage = userMessage;
+		this.time = new Date();
 	}
 
-	public String getMessaje() {
-		return messaje;
+	public String getDeveloperMessage() {
+		return developerMessage;
 	}
 
-	public void setMessaje(String messaje) {
-		this.messaje = messaje;
+	public void setDeveloperMessage(String developerMessage) {
+		this.developerMessage = developerMessage;
 	}
 
-	public Object getResponse() {
-		return response;
+	public String getUserMessage() {
+		return userMessage;
 	}
 
-	public void setResponse(Object response) {
-		this.response = response;
+	public void setUserMessage(String userMessage) {
+		this.userMessage = userMessage;
+	}
+
+	public Date getTime() {
+		return time;
+	}
+
+	public void setTime(Date time) {
+		this.time = time;
 	}
 
 }

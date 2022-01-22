@@ -2,7 +2,9 @@ package com.model;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -48,7 +50,7 @@ public class Room {
 	@JoinTable(name = "rooms_users", joinColumns = @JoinColumn(name = "room_fk_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "user_fk_id", nullable = false))
 	@ManyToMany(cascade = CascadeType.ALL)
 	@JsonManagedReference
-	private List<User> users;
+	private Set<User> users;
 
 	@OneToMany(mappedBy = "room", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
 			CascadeType.REFRESH })
@@ -77,13 +79,13 @@ public class Room {
 		this.description = description;
 		this.coverpage = coverPage;
 		this.owner = owner;
-		List<User> list = new ArrayList<User>();
+		Set<User> list = new HashSet<User>();
 		list.add(owner);
 		this.users = list;
 		this.state = 1;
 	}
 
-	public Room(String name, String description, CoverPage coverPage, User owner, List<User> users) {
+	public Room(String name, String description, CoverPage coverPage, User owner, Set<User> users) {
 		super();
 		this.name = name;
 		this.description = description;
@@ -95,7 +97,7 @@ public class Room {
 
 	public void addUsers(User theUser) {
 		if (theUser == null) {
-			users = new ArrayList<>();
+			users = new HashSet<>();
 		}
 
 		users.add(theUser);
@@ -153,11 +155,11 @@ public class Room {
 		this.owner = owner;
 	}
 
-	public List<User> getUsers() {
+	public Set<User> getUsers() {
 		return users;
 	}
 
-	public void setUsers(List<User> users) {
+	public void setUsers(Set<User> users) {
 		this.users = users;
 	}
 
