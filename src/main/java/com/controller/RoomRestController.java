@@ -128,7 +128,7 @@ public class RoomRestController {
 
 	}
 
-	@PutMapping("/rooms/{roomId}/{userId}")
+	@PostMapping("/rooms/{roomId}/{userId}")
 	public ResponseEntity<Object> addUser(@PathVariable int roomId, @PathVariable int userId) {
 		try {
 			User user = userService.findUserById(userId);
@@ -152,6 +152,30 @@ public class RoomRestController {
 			return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 
+	}
+
+	@PostMapping("/rooms/favorite/{roomId}")
+	public ResponseEntity<Response> addRoomToFavorite(HttpServletRequest request, @PathVariable int roomId) {
+		try {
+			int userId = jsonWebTokenService.validateUserJWT(request);
+			Room room = roomService.findRoomById(roomId);
+			User user = userService.findUserById(userId);
+			if (room.getUsers().remove(user)) {
+				room.addFavoriteUser(user);
+				roomService.saveRoom(room);
+			} else {
+				Response response = new Response("Room not found", "La sala no fue encontrada");
+				return new ResponseEntity<Response>(response, HttpStatus.NOT_FOUND);
+			}
+
+			Response response = new Response("Room added", "La sala se agrego a favoritos");
+			return new ResponseEntity<Response>(response, HttpStatus.OK);
+
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+
+		}
 	}
 
 	@PutMapping("/rooms")
@@ -179,30 +203,6 @@ public class RoomRestController {
 
 	}
 
-	@PutMapping("/rooms/favorite/{roomId}")
-	public ResponseEntity<Response> addRoomToFavorite(HttpServletRequest request, @PathVariable int roomId) {
-		try {
-			int userId = jsonWebTokenService.validateUserJWT(request);
-			Room room = roomService.findRoomById(roomId);
-			User user = userService.findUserById(userId);
-			if (room.getUsers().remove(user)) {
-				room.addFavoriteUser(user);
-				roomService.saveRoom(room);
-			} else {
-				Response response = new Response("Room not found", "La sala no fue encontrada");
-				return new ResponseEntity<Response>(response, HttpStatus.NOT_FOUND);
-			}
-
-			Response response = new Response("Room added", "La sala se agrego a favoritos");
-			return new ResponseEntity<Response>(response, HttpStatus.OK);
-
-		} catch (Exception ex) {
-			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
-			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
-
-		}
-	}
-
 	@DeleteMapping("rooms/{roomId}")
 	public ResponseEntity<Object> deteteRoom(HttpServletRequest request, @PathVariable int roomId) {
 
@@ -226,6 +226,39 @@ public class RoomRestController {
 					Response response = new Response("User Id mismatch",
 							"No tiene autorizacion para realizar esta accion");
 					return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+				}
+
+			}
+
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+
+		}
+	}
+
+	@DeleteMapping("rooms/{roomId}/{userId}")
+	public ResponseEntity<Object> deteteUserFromRoom(HttpServletRequest request, @PathVariable int roomId,
+			@PathVariable int userId) {
+
+		try {
+			Room room = roomService.findRoomById(roomId);
+
+			if (room == null) {
+				Response response = new Response("Room not found", "La sala no se encuentra en la base de datos");
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+			} else {
+				// int userId = jsonWebTokenService.validateUserJWT(request);
+				User user = userService.findUserById(userId);
+				if (room.getFavoriteUsers().remove(user) || room.getUsers().remove(user)) {
+
+					roomService.saveRoom(room);
+
+					Response response = new Response("User deleted from room", "El usuario ya no pertenece a la sala");
+					return new ResponseEntity<>(response, HttpStatus.OK);
+				} else {
+					Response response = new Response("User not found", "El usuario no pertencece a la sala");
+					return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 				}
 
 			}

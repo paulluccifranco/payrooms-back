@@ -1,6 +1,7 @@
 package com.modelDtos;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 public class ExpenseDto {
 
@@ -10,12 +11,15 @@ public class ExpenseDto {
 	private int idUser;
 	private int idRoom;
 	private String participants;
+	private Date date;
+	private int category;
 
 	public ExpenseDto() {
 		super();
 	}
 
-	public ExpenseDto(int id, String description, BigDecimal value, int idUser, int idRoom, String participants) {
+	public ExpenseDto(int id, String description, BigDecimal value, int idUser, int idRoom, String participants,
+			Date date, int category) {
 		super();
 		this.id = id;
 		this.description = description;
@@ -23,6 +27,8 @@ public class ExpenseDto {
 		this.idUser = idUser;
 		this.idRoom = idRoom;
 		this.participants = participants;
+		this.date = date;
+		this.category = category;
 	}
 
 	public ExpenseDto(String description, BigDecimal value, int idUser, int idRoom, String participants) {
@@ -87,6 +93,22 @@ public class ExpenseDto {
 
 	public void setParticipants(String participants) {
 		this.participants = participants;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public int getCategory() {
+		return category;
+	}
+
+	public void setCategory(int category) {
+		this.category = category;
 	}
 
 }

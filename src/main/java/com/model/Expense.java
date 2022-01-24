@@ -13,9 +13,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.UpdateTimestamp;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "expenses")
@@ -33,7 +32,7 @@ public class Expense {
 	private BigDecimal value;
 
 	@Column(name = "expense_date")
-	@UpdateTimestamp
+	// @UpdateTimestamp
 	private Date date;
 
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH })
@@ -49,6 +48,11 @@ public class Expense {
 	@Column(name = "expense_participants", length = 45)
 	private String participants;
 
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH })
+	@JoinColumn(name = "category_id")
+	@JsonManagedReference
+	private Category category;
+
 	public Expense() {
 		super();
 	}
@@ -59,7 +63,20 @@ public class Expense {
 		this.value = value;
 		this.user = user;
 		this.room = room;
+		this.date = new Date();
 		this.participants = participants;
+	}
+
+	public Expense(String description, BigDecimal value, User user, Room room, String participants, Date date,
+			Category category) {
+		super();
+		this.description = description;
+		this.value = value;
+		this.user = user;
+		this.room = room;
+		this.participants = participants;
+		this.date = date;
+		this.category = category;
 	}
 
 	public int getId() {
@@ -120,6 +137,14 @@ public class Expense {
 
 	public void setParticipants(String participants) {
 		this.participants = participants;
+	}
+
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
 	}
 
 	@Override

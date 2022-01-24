@@ -18,12 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.model.Category;
 import com.model.Expense;
 import com.model.Room;
 import com.model.User;
 import com.modelDtos.ExpenseDto;
 import com.modelDtos.Response;
 import com.security.JsonWebTokenService;
+import com.service.CategoryService;
 import com.service.ExpenseService;
 import com.service.RoomService;
 import com.service.UserService;
@@ -46,6 +48,9 @@ public class ExpenseRestController {
 
 	@Autowired
 	JsonWebTokenService jsonWebTokenService;
+
+	@Autowired
+	CategoryService categoryService;
 
 	@GetMapping("/expenses")
 	public List<Expense> findAll() {
@@ -72,9 +77,10 @@ public class ExpenseRestController {
 				Response response = new Response("Data not found", "Los datos no fueron encontrados");
 				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
+			Category category = categoryService.findCategoryById(expenseDto.getCategory());
 
 			Expense expense = new Expense(expenseDto.getDescription(), expenseDto.getValue(), user, room,
-					expenseDto.getParticipants());
+					expenseDto.getParticipants(), expenseDto.getDate(), category);
 			expense.setId(0);
 
 			int id = expenseService.saveExpense(expense);
@@ -90,17 +96,23 @@ public class ExpenseRestController {
 	}
 
 	@PutMapping("/expenses")
-	public ResponseEntity<Object> updateExpense(HttpServletRequest request, @RequestBody Expense expense) {
+	public ResponseEntity<Object> updateExpense(HttpServletRequest request, @RequestBody ExpenseDto expenseDto) {
 		try {
-			int userId = jsonWebTokenService.validateUserJWT(request);
-			if (userId == expense.getUserId()) {
-				expenseService.saveExpense(expense);
-				Response response = new Response("Expense edited", "El gasto fue editado con exito");
-				return new ResponseEntity<>(response, HttpStatus.OK);
-			} else {
-				Response response = new Response("User Id mismatch", "No tiene autorizacion para realizar esta accion");
-				return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+			// int userId = jsonWebTokenService.validateUserJWT(request);
+			Expense expense = expenseService.findExpenseById(expenseDto.getId());
+			if (expense == null) {
+				Response response = new Response("Expense not found", "El gasto no se encuentra");
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
+			Category category = categoryService.findCategoryById(expenseDto.getCategory());
+			expense.setDescription(expenseDto.getDescription());
+			expense.setValue(expenseDto.getValue());
+			expense.setDate(expenseDto.getDate());
+			expense.setParticipants(expenseDto.getParticipants());
+			expense.setCategory(category);
+			expenseService.saveExpense(expense);
+			Response response = new Response("Expense edited", "El gasto fue editado con exito");
+			return new ResponseEntity<>(response, HttpStatus.OK);
 
 		} catch (Exception ex) {
 			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");

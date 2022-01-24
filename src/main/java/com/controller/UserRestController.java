@@ -161,7 +161,7 @@ public class UserRestController {
 	}
 
 	@PutMapping("/users")
-	public ResponseEntity<Object> updateExpense(HttpServletRequest request, @RequestBody UserDto userDto) {
+	public ResponseEntity<Object> updateUser(HttpServletRequest request, @RequestBody UserDto userDto) {
 
 		try {
 			int userPayload = jsonWebTokenService.validateUserJWT(request);
@@ -183,23 +183,20 @@ public class UserRestController {
 
 	}
 
-	@DeleteMapping("users/{userId}")
-	public ResponseEntity<Object> deteteExpense(HttpServletRequest request, @PathVariable int userId) {
+	@DeleteMapping("/users")
+	public ResponseEntity<Object> deteteUser(HttpServletRequest request) {
 
 		try {
 			int userPayload = jsonWebTokenService.validateUserJWT(request);
-			if (userId == userPayload) {
-				User user = usersService.findUserById(userId);
-
-				if (user == null) {
-					Response response = new Response("Data not foun", "No se encuenta el usuario en la base de datos");
-					return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-				}
-
+			User user = usersService.findUserById(userPayload);
+			if (user == null) {
+				Response response = new Response("Data not foun", "No se encuenta el usuario en la base de datos");
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+			}
+			if (user.getId() == userPayload) {
 				user.setState(2);
 				user.setDate(new Date());
 				usersService.saveUser(user);
-
 				Response response = new Response("User state change", "Usuario dado de baja");
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else {

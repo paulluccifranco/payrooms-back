@@ -19,8 +19,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.UpdateTimestamp;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -63,8 +61,8 @@ public class Room {
 	private List<Expense> expenses;
 
 	@Column(name = "room_date")
-	@UpdateTimestamp
-	private Date date;
+	// @UpdateTimestamp
+	private Date date = new Date();
 
 	@JoinTable(name = "favorite_rooms", joinColumns = @JoinColumn(name = "room_fk_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "user_fk_id", nullable = false))
 	@ManyToMany(cascade = CascadeType.ALL)
