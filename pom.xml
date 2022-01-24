@@ -9,8 +9,8 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>TyF</groupId>
-	<artifactId>GastosApi</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>PayRooms</artifactId>
+	<version>0.1.3-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>GastosApi</name>
 	<description>Api Rest Para App</description>

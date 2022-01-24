@@ -66,11 +66,30 @@ public class Room {
 	@UpdateTimestamp
 	private Date date;
 
+	@JoinTable(name = "favorite_rooms", joinColumns = @JoinColumn(name = "room_fk_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "user_fk_id", nullable = false))
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JsonManagedReference
+	private List<User> favoriteUsers;
+
 	@Column(name = "room_state")
-	private int state;
+	private Boolean active;
+
+	@OneToMany(mappedBy = "room", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+			CascadeType.REFRESH })
+	private List<RoomLog> roomLogs;
+
+	@Column(name = "room_isFavorite")
+	private Boolean isFavorite = false;
 
 	public Room() {
 		super();
+	}
+
+	public Room(String name, String description, CoverPage coverPage) {
+		super();
+		this.name = name;
+		this.description = description;
+		this.coverpage = coverPage;
 	}
 
 	public Room(String name, String description, CoverPage coverPage, User owner) {
@@ -82,7 +101,7 @@ public class Room {
 		Set<User> list = new HashSet<User>();
 		list.add(owner);
 		this.users = list;
-		this.state = 1;
+		this.active = true;
 	}
 
 	public Room(String name, String description, CoverPage coverPage, User owner, Set<User> users) {
@@ -92,7 +111,7 @@ public class Room {
 		this.coverpage = coverPage;
 		this.owner = owner;
 		this.users = users;
-		this.state = 1;
+		this.active = true;
 	}
 
 	public void addUsers(User theUser) {
@@ -101,6 +120,15 @@ public class Room {
 		}
 
 		users.add(theUser);
+
+	}
+
+	public void addFavoriteUser(User theUser) {
+		if (theUser == null) {
+			favoriteUsers = new ArrayList<>();
+		}
+
+		favoriteUsers.add(theUser);
 
 	}
 
@@ -171,12 +199,28 @@ public class Room {
 		this.expenses = expenses;
 	}
 
-	public int getState() {
-		return state;
+	public List<User> getFavoriteUsers() {
+		return favoriteUsers;
 	}
 
-	public void setState(int state) {
-		this.state = state;
+	public void setFavoriteUsers(List<User> favoriteUsers) {
+		this.favoriteUsers = favoriteUsers;
+	}
+
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	public List<RoomLog> getRoomLogs() {
+		return roomLogs;
+	}
+
+	public void setRoomLogs(List<RoomLog> roomLogs) {
+		this.roomLogs = roomLogs;
 	}
 
 	public Date getDate() {
@@ -216,10 +260,18 @@ public class Room {
 
 	}
 
+	public Boolean getIsFavorite() {
+		return isFavorite;
+	}
+
+	public void setIsFavorite(Boolean isFavorite) {
+		this.isFavorite = isFavorite;
+	}
+
 	@Override
 	public String toString() {
 		return "Room [id=" + id + ", name=" + name + ", description=" + description + ", coverPage=" + coverpage
-				+ ", owner=" + owner + ", users=" + users + ", expenses=" + expenses + ", state=" + state + "]";
+				+ ", owner=" + owner + ", users=" + users + ", expenses=" + expenses + ", state=" + active + "]";
 	}
 
 }

@@ -10,6 +10,8 @@ public class UserDto {
 
 	private String username;
 
+	private String email;
+
 	private String password;
 
 	private Integer avatar;
@@ -24,11 +26,12 @@ public class UserDto {
 		this.password = password;
 	}
 
-	public UserDto(String name, String lastname, String username, String password, Integer avatar) {
+	public UserDto(String name, String lastname, String username, String email, String password, Integer avatar) {
 		super();
 		this.name = name;
 		this.lastname = lastname;
 		this.username = username;
+		this.email = email;
 		this.password = password;
 		this.avatar = avatar;
 	}
@@ -89,6 +92,14 @@ public class UserDto {
 
 	public void setAvatar(Integer avatar) {
 		this.avatar = avatar;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package com.controller;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,13 +20,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.model.CoverPage;
-import com.model.Expense;
-import com.model.Payment;
 import com.model.Room;
 import com.model.User;
 import com.modelDtos.Response;
 import com.modelDtos.RoomDto;
-import com.modelDtos.UserResponse;
 import com.security.JsonWebTokenService;
 import com.service.CoverPageService;
 import com.service.RoomService;
@@ -53,55 +49,65 @@ public class RoomRestController {
 	JsonWebTokenService jsonWebTokenService;
 
 	@GetMapping("/rooms")
-	public List<Room> findAll() {
-		return roomService.findRoomsList();
+	public ResponseEntity<List<Room>> findAll() {
+		return new ResponseEntity<>(roomService.findRoomsList(), HttpStatus.OK);
 	}
 
 	@GetMapping("/rooms/{roomId}")
-	public Room getRoom(@PathVariable int roomId) {
+	public ResponseEntity<Object> getRoom(@PathVariable int roomId) {
 		Room room = roomService.findRoomById(roomId);
 
 		if (room == null) {
-			throw new RuntimeException("Room id not found -" + roomId);
+			Response response = new Response("Data not found", "Los datos no estan cargados en la base");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+		} else {
+			return new ResponseEntity<>(room, HttpStatus.OK);
 		}
-		return room;
 	}
 
 	@GetMapping("/rooms/{roomId}/users")
-	public Set<User> getRoomUsers(@PathVariable int roomId) {
+	public ResponseEntity<?> getRoomUsers(@PathVariable int roomId) {
 		Room room = roomService.findRoomById(roomId);
 
 		if (room == null) {
-			throw new RuntimeException("Room id not found -" + roomId);
+			Response response = new Response("Data not found", "Los datos no estan cargados en la base");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+		} else {
+			return new ResponseEntity<>(room.getUsers(), HttpStatus.OK);
 		}
-		return room.getUsers();
 	}
 
 	@GetMapping("/rooms/{roomId}/payments")
-	public List<Payment> getRoomUPayments(@PathVariable int roomId) {
+	public ResponseEntity<?> getRoomPayments(@PathVariable int roomId) {
 		Room room = roomService.findRoomById(roomId);
 
 		if (room == null) {
-			throw new RuntimeException("Room id not found -" + roomId);
+			Response response = new Response("Data not found", "Los datos no estan cargados en la base");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+		} else {
+			return new ResponseEntity<>(room.getRoomPayments(), HttpStatus.OK);
 		}
-		return room.getRoomPayments();
 	}
 
 	@GetMapping("/rooms/{roomId}/expenses")
-	public List<Expense> getRoomExpenses(@PathVariable int roomId) {
+	public ResponseEntity<?> getRoomExpenses(@PathVariable int roomId) {
 		Room room = roomService.findRoomById(roomId);
 
 		if (room == null) {
-			throw new RuntimeException("Room id not found -" + roomId);
+			Response response = new Response("Data not found", "Los datos no estan cargados en la base");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+		} else {
+			return new ResponseEntity<>(room.getExpenses(), HttpStatus.OK);
 		}
-		return room.getExpenses();
+
 	}
 
 	@PostMapping("/rooms")
-	public ResponseEntity<Object> addRoom(@RequestBody RoomDto roomDto) {
+	public ResponseEntity<Object> addRoom(HttpServletRequest request, @RequestBody RoomDto roomDto) {
 		try {
+			int userId = jsonWebTokenService.validateUserJWT(request);
 			CoverPage coverpage = coverPageService.findCoverPageById(roomDto.getCoverPage());
-			User owner = userService.findUserById(roomDto.getOwner());
+			User owner = userService.findUserById(userId);
 
 			if (owner == null || coverpage == null) {
 				Response response = new Response("Data not found", "Los datos no estan cargados en la base");
@@ -110,10 +116,9 @@ public class RoomRestController {
 			Room room = new Room(roomDto.getName(), roomDto.getDescription(), coverpage, owner);
 			room.setId(0);
 
-			int id = roomService.saveRoom(room);
+			roomService.saveRoom(room);
 
-			UserResponse userResponse = new UserResponse(id, "Sala creada", null);
-			return new ResponseEntity<>(userResponse, HttpStatus.OK);
+			return new ResponseEntity<>(room, HttpStatus.OK);
 
 		} catch (Exception ex) {
 			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
@@ -128,6 +133,10 @@ public class RoomRestController {
 		try {
 			User user = userService.findUserById(userId);
 			Room room = roomService.findRoomById(roomId);
+			if (user == null) {
+				Response response = new Response("User not found", "El usuario no se encuentra en la base de datos");
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+			}
 			if (room.getUsers().contains(user)) {
 				Response response = new Response("Duplicated user", "El usuario ya se encuentra en la base de datos");
 				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -146,10 +155,15 @@ public class RoomRestController {
 	}
 
 	@PutMapping("/rooms")
-	public ResponseEntity<Object> updateRoom(HttpServletRequest request, @RequestBody Room room) {
+	public ResponseEntity<Object> updateRoom(HttpServletRequest request, @RequestBody RoomDto roomDto) {
 		try {
 			int userId = jsonWebTokenService.validateUserJWT(request);
+			Room room = roomService.findRoomById(roomDto.getId());
 			if (userId == room.getOwner().getId()) {
+				CoverPage coverPage = coverPageService.findCoverPageById(roomDto.getCoverPage());
+				room.setCoverpage(coverPage);
+				room.setDescription(roomDto.getDescription());
+				room.setName(roomDto.getName());
 				roomService.saveRoom(room);
 				return new ResponseEntity<>(room, HttpStatus.OK);
 			} else {
@@ -165,6 +179,30 @@ public class RoomRestController {
 
 	}
 
+	@PutMapping("/rooms/favorite/{roomId}")
+	public ResponseEntity<Response> addRoomToFavorite(HttpServletRequest request, @PathVariable int roomId) {
+		try {
+			int userId = jsonWebTokenService.validateUserJWT(request);
+			Room room = roomService.findRoomById(roomId);
+			User user = userService.findUserById(userId);
+			if (room.getUsers().remove(user)) {
+				room.addFavoriteUser(user);
+				roomService.saveRoom(room);
+			} else {
+				Response response = new Response("Room not found", "La sala no fue encontrada");
+				return new ResponseEntity<Response>(response, HttpStatus.NOT_FOUND);
+			}
+
+			Response response = new Response("Room added", "La sala se agrego a favoritos");
+			return new ResponseEntity<Response>(response, HttpStatus.OK);
+
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+
+		}
+	}
+
 	@DeleteMapping("rooms/{roomId}")
 	public ResponseEntity<Object> deteteRoom(HttpServletRequest request, @PathVariable int roomId) {
 
@@ -177,7 +215,7 @@ public class RoomRestController {
 			} else {
 				int userId = jsonWebTokenService.validateUserJWT(request);
 				if (userId == room.getOwner().getId()) {
-					room.setState(1);
+					room.setActive(false);
 					room.setDate(new Date());
 
 					roomService.saveRoom(room);

@@ -1,6 +1,7 @@
 package com.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -85,7 +86,14 @@ public class UserRestController {
 			throw new RuntimeException("User id not found -" + userId);
 		}
 		List<Room> rooms = new ArrayList<>();
+		List<Room> favorites = user.getFavoriteRooms();
+		for (Room favorite : favorites) {
+			favorite.setIsFavorite(true);
+		}
 		rooms.addAll(user.getRooms());
+		rooms.addAll(favorites);
+
+		Collections.reverse(rooms);
 
 		return rooms;
 	}
@@ -133,8 +141,8 @@ public class UserRestController {
 			User user = usersService.findUserByUsername(userDto.getUsername());
 			if (user == null) {
 				Avatar avatar = avatarsService.findAvatarById(userDto.getAvatar());
-				user = new User(userDto.getName(), userDto.getLastname(), userDto.getUsername(), userDto.getPassword(),
-						avatar);
+				user = new User(userDto.getName(), userDto.getLastname(), userDto.getUsername(), userDto.getEmail(),
+						userDto.getPassword(), avatar);
 
 				int id = usersService.saveUser(user);
 				String token = jsonWebTokenService.generateJWTToken("" + user.getId());

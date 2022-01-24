@@ -21,8 +21,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
@@ -41,8 +40,11 @@ public class User {
 	@Column(name = "user_lastname", length = 45)
 	private String lastname;
 
-	@Column(name = "user_username", length = 45, nullable = false)
+	@Column(name = "user_username", length = 45, nullable = false, unique = true)
 	private String username;
+
+	@Column(name = "user_email", length = 45, nullable = false)
+	private String email;
 
 	@Column(name = "user_password", nullable = false)
 	@JsonProperty(access = Access.WRITE_ONLY)
@@ -54,25 +56,33 @@ public class User {
 
 	@OneToMany(mappedBy = "owner", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
 			CascadeType.REFRESH })
-	@JsonBackReference
+	@JsonIgnore
 	private List<Room> ownRooms;
 
 	@ManyToMany(mappedBy = "users")
-	@JsonBackReference
-	private List<Room> rooms;
+	@JsonIgnore
+	private Set<Room> rooms;
+
+	@ManyToMany(mappedBy = "favoriteUsers")
+	@JsonIgnore
+	private List<Room> favoriteRooms;
+
+	@OneToMany(mappedBy = "user", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+			CascadeType.REFRESH })
+	private List<RoomLog> roomLogs;
 
 	@ManyToMany(mappedBy = "friends")
-	@JsonBackReference
+	@JsonIgnore
 	private Set<User> users;
 
 	@JoinTable(name = "users_friends", joinColumns = @JoinColumn(name = "user_fk_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "friend_fk_id", nullable = false))
 	@ManyToMany(cascade = CascadeType.ALL)
-	@JsonManagedReference
+	@JsonIgnore
 	private Set<User> friends;
 
 	@OneToMany(mappedBy = "user", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
 			CascadeType.REFRESH })
-	@JsonBackReference
+	@JsonIgnore
 	private List<Expense> expenses;
 
 	@Column(name = "user_state")
@@ -84,12 +94,12 @@ public class User {
 
 	@OneToMany(mappedBy = "reciever", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
 			CascadeType.REFRESH })
-	@JsonBackReference
+	@JsonIgnore
 	private List<Payment> paymentRecieved;
 
 	@OneToMany(mappedBy = "payer", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
 			CascadeType.REFRESH })
-	@JsonBackReference
+	@JsonIgnore
 	private List<Payment> paymentPayed;
 
 	public User() {
@@ -102,11 +112,12 @@ public class User {
 		this.username = username;
 	}
 
-	public User(String name, String lastname, String username, String password, Avatar avatar) {
+	public User(String name, String lastname, String username, String email, String password, Avatar avatar) {
 		super();
 		this.name = name;
 		this.lastname = lastname;
 		this.username = username;
+		this.email = email;
 		this.password = password;
 		this.avatar = avatar;
 	}
@@ -143,6 +154,14 @@ public class User {
 		this.username = username;
 	}
 
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	public String getPassword() {
 		return password;
 	}
@@ -167,11 +186,11 @@ public class User {
 		this.ownRooms = ownRooms;
 	}
 
-	public List<Room> getRooms() {
+	public Set<Room> getRooms() {
 		return rooms;
 	}
 
-	public void setRooms(List<Room> rooms) {
+	public void setRooms(Set<Room> rooms) {
 		this.rooms = rooms;
 	}
 
@@ -183,6 +202,22 @@ public class User {
 		ownRooms.add(theRoom);
 
 		theRoom.setOwner(this);
+	}
+
+	public List<Room> getFavoriteRooms() {
+		return favoriteRooms;
+	}
+
+	public void setFavoriteRooms(List<Room> favoriteRooms) {
+		this.favoriteRooms = favoriteRooms;
+	}
+
+	public List<RoomLog> getRoomLogs() {
+		return roomLogs;
+	}
+
+	public void setRoomLogs(List<RoomLog> roomLogs) {
+		this.roomLogs = roomLogs;
 	}
 
 	public Set<User> getFriends() {

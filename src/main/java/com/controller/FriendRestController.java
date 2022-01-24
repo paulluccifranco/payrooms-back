@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.model.User;
 import com.modelDtos.Response;
 import com.security.JsonWebTokenService;
-import com.service.AvatarService;
 import com.service.UserService;
 
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
@@ -32,9 +31,6 @@ public class FriendRestController {
 
 	@Autowired
 	private UserService usersService;
-
-	@Autowired
-	private AvatarService avatarsService;
 
 	@Autowired
 	JsonWebTokenService jsonWebTokenService;
