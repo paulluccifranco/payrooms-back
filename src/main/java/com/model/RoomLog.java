@@ -43,4 +43,65 @@ public class RoomLog {
 	@Column(name = "roomLog_elementId")
 	private int elementId;
 
+	public RoomLog() {
+		super();
+	}
+
+	public RoomLog(Room room, User user, Date update, LogRoomType type, int elementId) {
+		super();
+		this.room = room;
+		this.user = user;
+		this.update = update;
+		this.type = type;
+		this.elementId = elementId;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public Room getRoom() {
+		return room;
+	}
+
+	public void setRoom(Room room) {
+		this.room = room;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public Date getUpdate() {
+		return update;
+	}
+
+	public void setUpdate(Date update) {
+		this.update = update;
+	}
+
+	public LogRoomType getType() {
+		return type;
+	}
+
+	public void setType(LogRoomType type) {
+		this.type = type;
+	}
+
+	public int getElementId() {
+		return elementId;
+	}
+
+	public void setElementId(int elementId) {
+		this.elementId = elementId;
+	}
+
 }

@@ -78,8 +78,9 @@ public class UserRestController {
 		return user;
 	}
 
-	@GetMapping("/users/{userId}/rooms")
-	public List<Room> getUserRooms(@PathVariable int userId) {
+	@GetMapping("/users/rooms")
+	public List<Room> getUserRooms(HttpServletRequest request) {
+		int userId = jsonWebTokenService.validateUserJWT(request);
 		User user = usersService.findUserById(userId);
 
 		if (user == null) {

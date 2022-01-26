@@ -1,5 +1,6 @@
 package com.controller;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,11 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dao.RoomLogDAO;
 import com.model.Category;
 import com.model.Expense;
 import com.model.Room;
+import com.model.RoomLog;
 import com.model.User;
 import com.modelDtos.ExpenseDto;
+import com.modelDtos.LogRoomType;
 import com.modelDtos.Response;
 import com.security.JsonWebTokenService;
 import com.service.CategoryService;
@@ -51,6 +55,9 @@ public class ExpenseRestController {
 
 	@Autowired
 	CategoryService categoryService;
+
+	@Autowired
+	RoomLogDAO roomLogDAO;
 
 	@GetMapping("/expenses")
 	public List<Expense> findAll() {
@@ -84,6 +91,10 @@ public class ExpenseRestController {
 			expense.setId(0);
 
 			int id = expenseService.saveExpense(expense);
+			RoomLog roomLog = new RoomLog(room, user, new Date(), LogRoomType.EXPENSE_ADDED, id);
+
+			roomLogDAO.saveRoomLog(roomLog);
+
 			Response response = new Response("Expense created id: " + id, "El gasto fue creado con exito");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 
@@ -111,6 +122,11 @@ public class ExpenseRestController {
 			expense.setParticipants(expenseDto.getParticipants());
 			expense.setCategory(category);
 			expenseService.saveExpense(expense);
+
+			RoomLog roomLog = new RoomLog(expense.getRoom(), expense.getUser(), new Date(), LogRoomType.EXPENSE_UPDATED,
+					expense.getId());
+			roomLogDAO.saveRoomLog(roomLog);
+
 			Response response = new Response("Expense edited", "El gasto fue editado con exito");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 
@@ -134,6 +150,10 @@ public class ExpenseRestController {
 			} else {
 				if (userId == expense.getUserId()) {
 					expenseService.deleteExpense(expenseId);
+					RoomLog roomLog = new RoomLog(expense.getRoom(), expense.getUser(), new Date(),
+							LogRoomType.EXPENSE_DELETED, expense.getId());
+					roomLogDAO.saveRoomLog(roomLog);
+
 					Response response = new Response("Espense deleted", "El gasto fue dado de baja");
 					return new ResponseEntity<>(response, HttpStatus.OK);
 				} else {

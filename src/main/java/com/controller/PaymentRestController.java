@@ -1,5 +1,7 @@
 package com.controller;
 
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dao.RoomLogDAO;
 import com.model.Payment;
 import com.model.Room;
+import com.model.RoomLog;
 import com.model.User;
+import com.modelDtos.LogRoomType;
 import com.modelDtos.PaymentDto;
 import com.modelDtos.Response;
 import com.security.JsonWebTokenService;
@@ -44,6 +49,9 @@ public class PaymentRestController {
 
 	@Autowired
 	JsonWebTokenService jsonWebTokenService;
+
+	@Autowired
+	RoomLogDAO roomLogDAO;
 
 	@GetMapping("/payments/{paymentId}")
 	public Payment getPayment(@PathVariable int paymentId) {
@@ -72,6 +80,8 @@ public class PaymentRestController {
 			payment.setId(0);
 
 			int id = paymentService.savePayment(payment);
+			RoomLog roomLog = new RoomLog(room, payer, new Date(), LogRoomType.PAY_ADDED, id);
+			roomLogDAO.saveRoomLog(roomLog);
 
 			return new ResponseEntity<>("Pago Agregado, id pago = " + id, HttpStatus.OK);
 
@@ -99,6 +109,10 @@ public class PaymentRestController {
 		if (payment == null) {
 			throw new RuntimeException("Payment id not found -" + paymentId);
 		}
+
+		RoomLog roomLog = new RoomLog(payment.getRoom(), payment.getPayer(), new Date(), LogRoomType.PAY_DELETED,
+				payment.getId());
+		roomLogDAO.saveRoomLog(roomLog);
 
 		paymentService.deletePayment(paymentId);
 
