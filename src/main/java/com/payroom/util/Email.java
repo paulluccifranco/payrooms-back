@@ -1,4 +1,4 @@
-package com.util;
+package com.payroom.util;
 
 import java.util.Date;
 import java.util.List;
@@ -39,7 +39,7 @@ public class Email {
 			mensaje.setSubject(asunto);
 			mensaje.setText(textoCorreoElectronico);
 			Transport.send(mensaje);
-			String mensajeLog = "Se envi� el correo electronico de asunto:" + asunto + " a " + to;
+			String mensajeLog = "Se envio el correo electronico de asunto:" + asunto + " a " + to;
 			System.out.println(mensajeLog);
 		} catch (MessagingException e) {
 			e.printStackTrace();

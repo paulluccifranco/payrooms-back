@@ -18,19 +18,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.payroom.security.JWTAuthorizationFilter;
 
 @SpringBootApplication
-@ComponentScan({ "com.controller", "com.service", "com.dao", "com.daoImpl", "com.services.impl", "com.util",
-		"com.security" })
-@EntityScan("com.model")
-@EnableJpaRepositories("com.dao")
-public class GastosApiApplication extends SpringBootServletInitializer {
+@ComponentScan({ "com.payroom.controller", "com.payroom.service", "com.payroom.dao", "com.payroom.daoImpl",
+		"com.payroom.serviceImpl", "com.payroom.util", "com.payroom.security" })
+@EntityScan("com.payroom.model")
+@EnableJpaRepositories("com.payroom.dao")
+public class PayRoomsApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GastosApiApplication.class, args);
+		SpringApplication.run(PayRoomsApplication.class, args);
 	}
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-		return builder.sources(GastosApiApplication.class);
+		return builder.sources(PayRoomsApplication.class);
 	}
 
 	@EnableWebSecurity

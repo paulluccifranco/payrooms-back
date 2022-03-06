@@ -33,7 +33,6 @@ public class RoomServiceImpl implements RoomService {
 	public int saveRoom(Room room) {
 		roomDAO.saveRoom(room);
 		return room.getId();
-
 	}
 
 	@Override

@@ -22,12 +22,11 @@ public class RoomDAOImpl implements RoomDAO {
 	public List<Room> findRoomsList() {
 		Session currentSession = entityManager.unwrap(Session.class);
 
-		Query<Room> query = currentSession.createQuery("from Room", Room.class);
+		Query<Room> query = currentSession.createQuery("from Room where active = 1", Room.class);
 
 		List<Room> room = query.getResultList();
 
 		return room;
-
 	}
 
 	@Override
@@ -46,7 +45,6 @@ public class RoomDAOImpl implements RoomDAO {
 		currentSession.saveOrUpdate(room);
 
 		return room.getId();
-
 	}
 
 	@Override
@@ -57,7 +55,5 @@ public class RoomDAOImpl implements RoomDAO {
 
 		query.setParameter("idRoom", id);
 		query.executeUpdate();
-
 	}
-
 }
