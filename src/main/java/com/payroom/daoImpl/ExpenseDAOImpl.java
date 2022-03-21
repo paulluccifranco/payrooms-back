@@ -19,7 +19,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
 	private EntityManager entityManager;
 
 	@Override
-	public List<Expense> findExpensesList() {
+	public List<Expense> getExpensesList() {
 		Session currentSession = entityManager.unwrap(Session.class);
 		// puto el que lee
 		Query<Expense> query = currentSession.createQuery("from Expense", Expense.class);
@@ -31,7 +31,7 @@ public class ExpenseDAOImpl implements ExpenseDAO {
 	}
 
 	@Override
-	public Expense findExpenseById(int id) {
+	public Expense getExpenseById(int id) {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		Expense expense = currentSession.get(Expense.class, id);

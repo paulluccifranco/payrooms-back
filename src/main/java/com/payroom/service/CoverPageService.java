@@ -2,16 +2,16 @@ package com.payroom.service;
 
 import java.util.List;
 
-import com.payroom.model.CoverPage;
+import com.payroom.model.Coverpage;
 
-public interface CoverPageService {
+public interface CoverpageService {
 
-	public List<CoverPage> findCoverPagesList();
+	public List<Coverpage> getCoverpagesList();
 
-	public CoverPage findCoverPageById(int id);
+	public Coverpage getCoverpageById(int id);
 
-	public void saveCoverPage(CoverPage coverPage);
+	public void saveCoverpage(Coverpage coverpage);
 
-	public void deleteCoverPageById(int id);
+	public void deleteCoverpageById(int id);
 
 }

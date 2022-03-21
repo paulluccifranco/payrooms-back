@@ -18,13 +18,13 @@ public class RoomLogDAOImpl implements RoomLogDAO {
 	@Autowired
 	EntityManager entityManager;
 
-	public List<RoomLog> findRoomLogsByRoom(Room room) {
+	public List<RoomLog> getRoomLogsByRoom(Room room) {
 
 		return null;
 
 	}
 
-	public List<RoomLog> findRoomLogsByUser(User user) {
+	public List<RoomLog> getRoomLogsByUser(User user) {
 
 		return null;
 	}

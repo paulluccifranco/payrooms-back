@@ -6,9 +6,9 @@ import com.payroom.model.Room;
 
 public interface RoomDAO {
 
-	public List<Room> findRoomsList();
+	public List<Room> getRoomsList();
 
-	public Room findRoomById(int id);
+	public Room getRoomById(int id);
 
 	public int saveRoom(Room room);
 

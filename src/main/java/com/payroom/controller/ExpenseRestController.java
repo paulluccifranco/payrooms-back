@@ -60,13 +60,13 @@ public class ExpenseRestController {
 	RoomLogDAO roomLogDAO;
 
 	@GetMapping("/expenses")
-	public List<Expense> findAll() {
-		return expenseService.findExpenseList();
+	public List<Expense> getAll() {
+		return expenseService.getExpenseList();
 	}
 
 	@GetMapping("/expenses/{expenseId}")
 	public Expense getExpense(@PathVariable int expenseId) {
-		Expense expense = expenseService.findExpenseById(expenseId);
+		Expense expense = expenseService.getExpenseById(expenseId);
 
 		if (expense == null) {
 			throw new RuntimeException("Expense id not found -" + expenseId);
@@ -77,14 +77,14 @@ public class ExpenseRestController {
 	@PostMapping("/expenses")
 	public ResponseEntity<Object> addExpense(@RequestBody ExpenseDto expenseDto) {
 		try {
-			Room room = roomService.findRoomById(expenseDto.getIdRoom());
-			User user = userService.findUserById(expenseDto.getIdUser());
+			Room room = roomService.getRoomById(expenseDto.getIdRoom());
+			User user = userService.getUserById(expenseDto.getIdUser());
 
 			if (user == null || room == null) {
 				Response response = new Response("Data not found", "Los datos no fueron encontrados");
 				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
-			Category category = categoryService.findCategoryById(expenseDto.getCategory());
+			Category category = categoryService.getCategoryById(expenseDto.getCategory());
 
 			Expense expense = new Expense(expenseDto.getDescription(), expenseDto.getValue(), user, room,
 					expenseDto.getParticipants(), expenseDto.getDate(), category);
@@ -92,6 +92,9 @@ public class ExpenseRestController {
 
 			int id = expenseService.saveExpense(expense);
 			RoomLog roomLog = new RoomLog(room, user, new Date(), LogRoomType.EXPENSE_ADDED, id);
+
+			room.setLastUpdate(new Date());
+			roomService.saveRoom(room);
 
 			roomLogDAO.saveRoomLog(roomLog);
 
@@ -110,12 +113,12 @@ public class ExpenseRestController {
 	public ResponseEntity<Object> updateExpense(HttpServletRequest request, @RequestBody ExpenseDto expenseDto) {
 		try {
 			// int userId = jsonWebTokenService.validateUserJWT(request);
-			Expense expense = expenseService.findExpenseById(expenseDto.getId());
+			Expense expense = expenseService.getExpenseById(expenseDto.getId());
 			if (expense == null) {
 				Response response = new Response("Expense not found", "El gasto no se encuentra");
 				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 			}
-			Category category = categoryService.findCategoryById(expenseDto.getCategory());
+			Category category = categoryService.getCategoryById(expenseDto.getCategory());
 			expense.setDescription(expenseDto.getDescription());
 			expense.setValue(expenseDto.getValue());
 			expense.setDate(expenseDto.getDate());
@@ -142,7 +145,7 @@ public class ExpenseRestController {
 	public ResponseEntity<Object> deteteExpense(HttpServletRequest request, @PathVariable int expenseId) {
 		try {
 			int userId = jsonWebTokenService.validateUserJWT(request);
-			Expense expense = expenseService.findExpenseById(expenseId);
+			Expense expense = expenseService.getExpenseById(expenseId);
 
 			if (expense == null) {
 				Response response = new Response("Expense not found", "El gasto no existe");

@@ -2,16 +2,16 @@ package com.payroom.dao;
 
 import java.util.List;
 
-import com.payroom.model.CoverPage;
+import com.payroom.model.Coverpage;
 
-public interface CoverPageDAO {
+public interface CoverpageDAO {
 
-	public List<CoverPage> findCoverPagesList();
+	public List<Coverpage> getCoverpagesList();
 
-	public CoverPage findCoverPageById(int id);
+	public Coverpage getCoverpageById(int id);
 
-	public void saveCoverPage(CoverPage coverPage);
+	public void saveCoverpage(Coverpage coverpage);
 
-	public void deleteCoverPage(int id);
+	public void deleteCoverpage(int id);
 
 }

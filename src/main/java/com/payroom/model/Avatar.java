@@ -1,17 +1,11 @@
 package com.payroom.model;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "avatars")
@@ -24,11 +18,6 @@ public class Avatar {
 
 	@Column(name = "avatar_url", length = 1024)
 	private String url;
-
-	@OneToMany(mappedBy = "avatar", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-			CascadeType.REFRESH })
-	@JsonIgnore
-	private List<User> users;
 
 	public Avatar() {
 		super();
@@ -55,17 +44,9 @@ public class Avatar {
 		this.url = url;
 	}
 
-	public List<User> getUsers() {
-		return users;
-	}
-
-	public void setUsers(List<User> users) {
-		this.users = users;
-	}
-
 	@Override
 	public String toString() {
-		return "Avatar [id=" + id + ", url=" + url + ", users=" + users + "]";
+		return "Avatar [id=" + id + ", url=" + url + "]";
 	}
 
 }

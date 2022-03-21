@@ -19,7 +19,7 @@ public class PaymentDAOImpl implements PaymentDAO {
 	private EntityManager entityManager;
 
 	@Override
-	public List<Payment> findPaymentsList() {
+	public List<Payment> getPaymentsList() {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		Query<Payment> query = currentSession.createQuery("from Payment", Payment.class);
@@ -31,7 +31,7 @@ public class PaymentDAOImpl implements PaymentDAO {
 	}
 
 	@Override
-	public Payment findPaymentById(int id) {
+	public Payment getPaymentById(int id) {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		Payment payment = currentSession.get(Payment.class, id);

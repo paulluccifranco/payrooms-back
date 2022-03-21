@@ -5,16 +5,18 @@ public class UserResponse {
 	private int id;
 	private String username;
 	private String token;
+	private String avatar;
 
 	public UserResponse() {
 		super();
 	}
 
-	public UserResponse(int id, String username, String token) {
+	public UserResponse(int id, String username, String token, String avatar) {
 		super();
 		this.id = id;
 		this.username = username;
 		this.token = token;
+		this.avatar = avatar;
 	}
 
 	public int getId() {
@@ -39,6 +41,14 @@ public class UserResponse {
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
 	}
 
 	@Override

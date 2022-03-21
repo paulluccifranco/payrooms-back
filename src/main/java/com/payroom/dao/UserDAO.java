@@ -6,13 +6,15 @@ import com.payroom.model.User;
 
 public interface UserDAO {
 
-	public List<User> findUsersList();
+	public List<User> getUsersList();
 
-	public User findUserById(int id);
+	public User getUserById(int id);
 
-	public User findUserByUsername(String usrn);
+	public User getUserByUsername(String usrn);
 
-	public List<User> findUsersByUsername(String usrn);
+	public User getUserByGoogleId(String usrn);
+
+	public List<User> getUsersByUsername(String usrn);
 
 	public int saveUser(User user);
 

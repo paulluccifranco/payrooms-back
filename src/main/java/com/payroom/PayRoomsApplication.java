@@ -41,8 +41,9 @@ public class PayRoomsApplication extends SpringBootServletInitializer {
 		protected void configure(HttpSecurity http) throws Exception {
 			http.csrf().disable()
 					.addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
-					.authorizeRequests().antMatchers(HttpMethod.POST, "/api/v1.0/login", "/api/v1.0/users").permitAll()
-					.anyRequest().authenticated();
+					.authorizeRequests()
+					.antMatchers(HttpMethod.POST, "/api/v1.0/login", "/api/v1.0/users", "/api/v1.0/social-login")
+					.permitAll().anyRequest().authenticated();
 			http.cors();
 			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}

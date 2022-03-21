@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "coverpages")
-public class CoverPage {
+public class Coverpage {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,11 +30,11 @@ public class CoverPage {
 	@JsonIgnore
 	private List<Room> rooms;
 
-	public CoverPage() {
+	public Coverpage() {
 		super();
 	}
 
-	public CoverPage(String url) {
+	public Coverpage(String url) {
 		super();
 		this.url = url;
 	}
@@ -65,7 +65,7 @@ public class CoverPage {
 
 	@Override
 	public String toString() {
-		return "CoverPage [id=" + id + ", url=" + url + ", rooms=" + rooms + "]";
+		return "Coverpage [id=" + id + ", url=" + url + ", rooms=" + rooms + "]";
 	}
 
 }

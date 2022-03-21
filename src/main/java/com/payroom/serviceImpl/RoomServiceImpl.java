@@ -18,14 +18,14 @@ public class RoomServiceImpl implements RoomService {
 	private RoomDAO roomDAO;
 
 	@Override
-	public List<Room> findRoomsList() {
-		List<Room> listUsers = roomDAO.findRoomsList();
+	public List<Room> getRoomsList() {
+		List<Room> listUsers = roomDAO.getRoomsList();
 		return listUsers;
 	}
 
 	@Override
-	public Room findRoomById(int id) {
-		Room user = roomDAO.findRoomById(id);
+	public Room getRoomById(int id) {
+		Room user = roomDAO.getRoomById(id);
 		return user;
 	}
 

@@ -8,9 +8,9 @@ import com.payroom.model.User;
 
 public interface RoomLogDAO {
 
-	public List<RoomLog> findRoomLogsByRoom(Room room);
+	public List<RoomLog> getRoomLogsByRoom(Room room);
 
-	public List<RoomLog> findRoomLogsByUser(User user);
+	public List<RoomLog> getRoomLogsByUser(User user);
 
 	public int saveRoomLog(RoomLog roomLog);
 

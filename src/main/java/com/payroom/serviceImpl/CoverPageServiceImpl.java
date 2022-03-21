@@ -6,38 +6,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.payroom.dao.CoverPageDAO;
-import com.payroom.model.CoverPage;
-import com.payroom.service.CoverPageService;
+import com.payroom.dao.CoverpageDAO;
+import com.payroom.model.Coverpage;
+import com.payroom.service.CoverpageService;
 
 @Service
 @Transactional
-public class CoverPageServiceImpl implements CoverPageService {
+public class CoverpageServiceImpl implements CoverpageService {
 
 	@Autowired
-	private CoverPageDAO coverPagesDAO;
+	private CoverpageDAO coverpagesDAO;
 
 	@Override
-	public List<CoverPage> findCoverPagesList() {
-		List<CoverPage> listCoverPages = coverPagesDAO.findCoverPagesList();
-		return listCoverPages;
+	public List<Coverpage> getCoverpagesList() {
+		List<Coverpage> listCoverpages = coverpagesDAO.getCoverpagesList();
+		return listCoverpages;
 	}
 
 	@Override
-	public CoverPage findCoverPageById(int id) {
-		CoverPage coverPage = coverPagesDAO.findCoverPageById(id);
-		return coverPage;
+	public Coverpage getCoverpageById(int id) {
+		Coverpage coverpage = coverpagesDAO.getCoverpageById(id);
+		return coverpage;
 	}
 
 	@Override
-	public void saveCoverPage(CoverPage coverPage) {
-		coverPagesDAO.saveCoverPage(coverPage);
+	public void saveCoverpage(Coverpage coverpage) {
+		coverpagesDAO.saveCoverpage(coverpage);
 
 	}
 
 	@Override
-	public void deleteCoverPageById(int id) {
-		coverPagesDAO.deleteCoverPage(id);
+	public void deleteCoverpageById(int id) {
+		coverpagesDAO.deleteCoverpage(id);
 	}
 
 }

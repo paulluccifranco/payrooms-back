@@ -19,7 +19,7 @@ public class RoomDAOImpl implements RoomDAO {
 	private EntityManager entityManager;
 
 	@Override
-	public List<Room> findRoomsList() {
+	public List<Room> getRoomsList() {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		Query<Room> query = currentSession.createQuery("from Room where active = 1", Room.class);
@@ -30,7 +30,7 @@ public class RoomDAOImpl implements RoomDAO {
 	}
 
 	@Override
-	public Room findRoomById(int id) {
+	public Room getRoomById(int id) {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		Room room = currentSession.get(Room.class, id);

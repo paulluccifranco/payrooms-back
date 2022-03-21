@@ -1,7 +1,6 @@
 package com.payroom.controller;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -24,10 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.payroom.model.Avatar;
 import com.payroom.model.Expense;
 import com.payroom.model.Room;
+import com.payroom.model.RoomUser;
 import com.payroom.model.User;
+import com.payroom.modelDtos.GoogleUserDto;
 import com.payroom.modelDtos.Response;
+import com.payroom.modelDtos.RoomUserDto;
+import com.payroom.modelDtos.SocialUserDto;
 import com.payroom.modelDtos.UserDto;
 import com.payroom.modelDtos.UserResponse;
+import com.payroom.modelDtos.UserRoomDto;
+import com.payroom.security.GoogleWebService;
 import com.payroom.security.JsonWebTokenService;
 import com.payroom.service.AvatarService;
 import com.payroom.service.UserService;
@@ -48,16 +53,19 @@ public class UserRestController {
 	@Autowired
 	JsonWebTokenService jsonWebTokenService;
 
+	@Autowired
+	GoogleWebService googleService;
+
 	@GetMapping("/users")
 	public List<User> getUsersList() {
 
-		return usersService.findUsersList();
+		return usersService.getUsersList();
 	}
 
 	@GetMapping("/users/list/{username}")
 	public List<User> getUsersByUsername(@PathVariable String username) {
 
-		List<User> users = usersService.findUsersByUsername(username);
+		List<User> users = usersService.getUsersByUsername(username);
 
 		return users;
 	}
@@ -70,7 +78,7 @@ public class UserRestController {
 
 	@GetMapping("/users/{userId}")
 	public User getUserById(@PathVariable int userId) {
-		User user = usersService.findUserById(userId);
+		User user = usersService.getUserById(userId);
 
 		if (user == null) {
 			throw new RuntimeException("Expense id not found -" + userId);
@@ -79,29 +87,47 @@ public class UserRestController {
 	}
 
 	@GetMapping("/users/rooms")
-	public List<Room> getUserRooms(HttpServletRequest request) {
+	public List<RoomUserDto> getUserRooms(HttpServletRequest request) {
 		int userId = jsonWebTokenService.validateUserJWT(request);
-		User user = usersService.findUserById(userId);
+		User user = usersService.getUserById(userId);
 
 		if (user == null) {
 			throw new RuntimeException("User id not found -" + userId);
 		}
-		List<Room> rooms = new ArrayList<>();
-		List<Room> favorites = user.getFavoriteRooms();
-		for (Room favorite : favorites) {
-			favorite.setIsFavorite(true);
+		List<RoomUserDto> rooms = new ArrayList<>();
+		List<RoomUser> roomsUsers = user.getRoomsUsers();
+		for (RoomUser roomUser : roomsUsers) {
+			if (roomUser.getState()) {
+				RoomUserDto room = new RoomUserDto(roomUser.getRoom().getId(), roomUser.getRoom().getName(),
+						roomUser.getRoom().getDescription(), roomUser.getRoom().getCoverpage());
+				room.setIsFavorite(roomUser.getIsFavorite());
+				room.setDate(roomUser.getRoom().getDate());
+				if (roomUser.getIsAdmin()) {
+					room.setOwner(roomUser.getRoom().getOwner().getId());
+				}
+				List<UserRoomDto> users = new ArrayList<UserRoomDto>();
+				Room roomOne = roomUser.getRoom();
+				List<RoomUser> userRooms = roomOne.getRoomUsers();
+				for (RoomUser usr : userRooms) {
+					UserRoomDto userDto = new UserRoomDto(usr.getUser().getId(), usr.getUser().getName(),
+							usr.getUser().getLastname(), usr.getUser().getUsername(), usr.getUser().getEmail(),
+							usr.getUser().getAvatar());
+					users.add(userDto);
+				}
+				room.setLastUpdate(roomOne.getLastUpdate());
+				room.setUsers(users);
+				rooms.add(room);
+			}
 		}
-		rooms.addAll(user.getRooms());
-		rooms.addAll(favorites);
 
-		Collections.reverse(rooms);
+		// Collections.reverse(rooms);
 
 		return rooms;
 	}
 
 	@GetMapping("/users/{userId}/expenses")
 	public List<Expense> getUserExpenses(@PathVariable int userId) {
-		User user = usersService.findUserById(userId);
+		User user = usersService.getUserById(userId);
 
 		if (user == null) {
 			throw new RuntimeException("User id not found -" + userId);
@@ -114,18 +140,19 @@ public class UserRestController {
 
 	@PostMapping("/login")
 	public ResponseEntity<Object> login(@RequestBody UserDto log) {
-		UserResponse jwt = new UserResponse(0, null, null);
-		User user = usersService.findUserByUsername(log.getUsername());
+		UserResponse jwt = new UserResponse(0, null, null, null);
+		User user = usersService.getUserByUsername(log.getUsername());
 		if (user == null) {
-			Response response = new Response("User dont find", "Usuario Inexistente");
+			Response response = new Response("User dont get", "Usuario Inexistente");
 			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		} else {
 			String pass = user.getPassword();
 			jwt.setUsername(user.getUsername());
-			if (log.getPassword().equals(pass)) {
+			if (log.getPassword().equals(pass) && user.getGoogleId() == null) {
 				String token = jsonWebTokenService.generateJWTToken("" + user.getId());
 				jwt.setToken(token);
 				jwt.setId(user.getId());
+				jwt.setAvatar(user.getAvatar());
 				return new ResponseEntity<>(jwt, HttpStatus.OK);
 			} else {
 				Response response = new Response("Password not match", "Contraseña incorrecta");
@@ -136,18 +163,57 @@ public class UserRestController {
 
 	}
 
+	@PostMapping("/social-login")
+	public ResponseEntity<Object> socialLogin(@RequestBody SocialUserDto social) {
+		try {
+			GoogleUserDto googleUser = googleService.getGoogleUser(social.getToken());
+			User user = usersService.getUserByGoogleId(googleUser.getId());
+			if (user == null) {
+				if (social.getUsername() == null) {
+					Response failResponse = new Response("Error registro", "Debe registrar un nombre de usuario");
+					return new ResponseEntity<>(failResponse, HttpStatus.I_AM_A_TEAPOT);
+				} else {
+					if (usersService.getUserByUsername(social.getUsername()) == null) {
+						user = new User(googleUser.getName(), googleUser.getGivenName(), social.getUsername(),
+								googleUser.getEmail(), googleUser.getId(), "goo", googleUser.getPictureUrl());
+						int id = usersService.saveUser(user);
+						String token = jsonWebTokenService.generateJWTToken("" + user.getId());
+						UserResponse response = new UserResponse(id, user.getUsername(), token,
+								googleUser.getPictureUrl());
+						return new ResponseEntity<>(response, HttpStatus.OK);
+					} else {
+						Response failResponse = new Response("Error registro",
+								"El nombre de usuario ya esta registrado");
+						return new ResponseEntity<>(failResponse, HttpStatus.I_AM_A_TEAPOT);
+					}
+
+				}
+			} else {
+				String token = jsonWebTokenService.generateJWTToken("" + user.getId());
+				UserResponse response = new UserResponse(user.getId(), user.getUsername(), token,
+						googleUser.getPictureUrl());
+
+				return new ResponseEntity<>(response, HttpStatus.OK);
+			}
+		} catch (Exception ex) {
+			System.out.println(ex);
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+	}
+
 	@PostMapping("/users")
 	public ResponseEntity<Object> addUser(@RequestBody UserDto userDto) {
 		try {
-			User user = usersService.findUserByUsername(userDto.getUsername());
+			User user = usersService.getUserByUsername(userDto.getUsername());
 			if (user == null) {
-				Avatar avatar = avatarsService.findAvatarById(userDto.getAvatar());
+				Avatar avatar = avatarsService.getAvatarById(userDto.getAvatar());
 				user = new User(userDto.getName(), userDto.getLastname(), userDto.getUsername(), userDto.getEmail(),
-						userDto.getPassword(), avatar);
+						userDto.getPassword(), avatar.getUrl());
 
 				int id = usersService.saveUser(user);
 				String token = jsonWebTokenService.generateJWTToken("" + user.getId());
-				UserResponse response = new UserResponse(id, user.getUsername(), token);
+				UserResponse response = new UserResponse(id, user.getUsername(), token, avatar.getUrl());
 
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else {
@@ -167,7 +233,7 @@ public class UserRestController {
 		try {
 			int userPayload = jsonWebTokenService.validateUserJWT(request);
 			if (userPayload == userDto.getId()) {
-				User user = usersService.findUserById(userDto.getId());
+				User user = usersService.getUserById(userDto.getId());
 				user.setName(userDto.getName());
 
 				usersService.saveUser(user);
@@ -189,7 +255,7 @@ public class UserRestController {
 
 		try {
 			int userPayload = jsonWebTokenService.validateUserJWT(request);
-			User user = usersService.findUserById(userPayload);
+			User user = usersService.getUserById(userPayload);
 			if (user == null) {
 				Response response = new Response("Data not foun", "No se encuenta el usuario en la base de datos");
 				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);

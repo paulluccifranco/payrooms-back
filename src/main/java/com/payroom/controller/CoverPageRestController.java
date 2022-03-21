@@ -13,44 +13,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.payroom.model.CoverPage;
-import com.payroom.service.CoverPageService;
-
-import io.jsonwebtoken.Jwts;
+import com.payroom.model.Coverpage;
+import com.payroom.service.CoverpageService;
 
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST })
 @RestController
 @RequestMapping("/api/v1.0")
 
-public class CoverPageRestController {
+public class CoverpageRestController {
 
 	@Autowired
-	private CoverPageService coverPagesService;
+	private CoverpageService coverpagesService;
 
-	@GetMapping("/coverPages")
-	public ResponseEntity<List<CoverPage>> getCoverPagesList(@RequestHeader("Authorization") String language) {
-
-		String token = language.replace("Token ", "");
-		if (token != null) {
-			// Se procesa el token y se recupera el usuario.
-			String user = Jwts.parser().setSigningKey("mySecretKey".getBytes()).parseClaimsJws(token).getBody()
-					.getSubject();
-
-			System.out.println(user);
-
-		}
-
-		return new ResponseEntity<>(coverPagesService.findCoverPagesList(), HttpStatus.OK);
+	@GetMapping("/coverpages")
+	public ResponseEntity<List<Coverpage>> getCoverpagesList(@RequestHeader("Authorization") String language) {
+		return new ResponseEntity<>(coverpagesService.getCoverpagesList(), HttpStatus.OK);
 	}
 
-	@GetMapping("/coverPages/{coverPageId}")
-	public CoverPage getCoverPageById(@PathVariable int coverPageId) {
-		CoverPage coverPage = coverPagesService.findCoverPageById(coverPageId);
+	@GetMapping("/coverpages/{coverpageId}")
+	public Coverpage getCoverpageById(@PathVariable int coverpageId) {
+		Coverpage coverpage = coverpagesService.getCoverpageById(coverpageId);
 
-		if (coverPage == null) {
-			throw new RuntimeException("Expense id not found -" + coverPageId);
+		if (coverpage == null) {
+			throw new RuntimeException("Expense id not found -" + coverpageId);
 		}
-		return coverPage;
+		return coverpage;
 	}
 
 }

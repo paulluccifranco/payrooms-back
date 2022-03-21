@@ -18,14 +18,14 @@ public class AvatarServiceImpl implements AvatarService {
 	private AvatarDAO avatarsDAO;
 
 	@Override
-	public List<Avatar> findAvatarsList() {
-		List<Avatar> listAvatars = avatarsDAO.findAvatarsList();
+	public List<Avatar> getAvatarsList() {
+		List<Avatar> listAvatars = avatarsDAO.getAvatarsList();
 		return listAvatars;
 	}
 
 	@Override
-	public Avatar findAvatarById(int id) {
-		Avatar avatar = avatarsDAO.findAvatarById(id);
+	public Avatar getAvatarById(int id) {
+		Avatar avatar = avatarsDAO.getAvatarById(id);
 		return avatar;
 	}
 

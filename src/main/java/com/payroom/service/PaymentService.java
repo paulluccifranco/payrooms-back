@@ -6,9 +6,9 @@ import com.payroom.model.Payment;
 
 public interface PaymentService {
 
-	public List<Payment> findPaymentsList();
+	public List<Payment> getPaymentsList();
 
-	public Payment findPaymentById(int id);
+	public Payment getPaymentById(int id);
 
 	public int savePayment(Payment payment);
 

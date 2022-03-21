@@ -19,7 +19,7 @@ public class UserDAOImpl implements UserDAO {
 	private EntityManager entityManager;
 
 	@Override
-	public List<User> findUsersList() {
+	public List<User> getUsersList() {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		Query<User> query = currentSession.createQuery("from User", User.class);
@@ -31,7 +31,7 @@ public class UserDAOImpl implements UserDAO {
 	}
 
 	@Override
-	public User findUserByUsername(String usrn) {
+	public User getUserByUsername(String usrn) {
 		Session currentSession = entityManager.unwrap(Session.class);
 		Query<User> query = currentSession.createQuery("from User WHERE username=:usrn", User.class);
 		query.setParameter("usrn", usrn);
@@ -42,7 +42,7 @@ public class UserDAOImpl implements UserDAO {
 	}
 
 	@Override
-	public List<User> findUsersByUsername(String usrn) {
+	public List<User> getUsersByUsername(String usrn) {
 		Session currentSession = entityManager.unwrap(Session.class);
 		usrn = usrn + "%";
 
@@ -56,7 +56,18 @@ public class UserDAOImpl implements UserDAO {
 	}
 
 	@Override
-	public User findUserById(int id) {
+	public User getUserByGoogleId(String gid) {
+		Session currentSession = entityManager.unwrap(Session.class);
+		Query<User> query = currentSession.createQuery("from User WHERE googleId=:gid", User.class);
+		query.setParameter("gid", gid);
+		User user = query.uniqueResult();
+
+		return user;
+
+	}
+
+	@Override
+	public User getUserById(int id) {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		User user = currentSession.get(User.class, id);

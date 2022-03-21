@@ -19,7 +19,7 @@ public class AvatarDAOImpl implements AvatarDAO {
 	private EntityManager entityManager;
 
 	@Override
-	public List<Avatar> findAvatarsList() {
+	public List<Avatar> getAvatarsList() {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		Query<Avatar> query = currentSession.createQuery("from Avatar", Avatar.class);
@@ -31,7 +31,7 @@ public class AvatarDAOImpl implements AvatarDAO {
 	}
 
 	@Override
-	public Avatar findAvatarById(int id) {
+	public Avatar getAvatarById(int id) {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		Avatar avatar = currentSession.get(Avatar.class, id);

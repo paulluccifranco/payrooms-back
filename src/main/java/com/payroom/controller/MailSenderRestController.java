@@ -33,7 +33,7 @@ public class MailSenderRestController {
 	@PostMapping("/sendemail/{userId}")
 	public String sendEmail(@PathVariable int userId) {
 
-		User user = userService.findUserById(userId);
+		User user = userService.getUserById(userId);
 		String email = user.getEmail();
 
 		emailService.enviarMensaje("noreply@gmail.com", email, "Registro en nueva sala",

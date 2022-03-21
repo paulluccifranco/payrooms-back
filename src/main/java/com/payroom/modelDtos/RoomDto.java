@@ -5,36 +5,36 @@ public class RoomDto {
 	private int id;
 	private String name;
 	private String description;
-	private int coverPage;
+	private int coverpage;
 	private int owner;
 
 	public RoomDto() {
 		super();
 	}
 
-	public RoomDto(int id, String name, String description, int coverPage, int owner) {
+	public RoomDto(int id, String name, String description, int coverpage, int owner) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.coverPage = coverPage;
+		this.coverpage = coverpage;
 		this.owner = owner;
 	}
 
-	public RoomDto(String name, String description, int coverPage, int owner) {
+	public RoomDto(String name, String description, int coverpage, int owner) {
 		super();
 		this.name = name;
 		this.description = description;
-		this.coverPage = coverPage;
+		this.coverpage = coverpage;
 		this.owner = owner;
 	}
 
-	public RoomDto(int id, String name, String description, int coverPage) {
+	public RoomDto(int id, String name, String description, int coverpage) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.coverPage = coverPage;
+		this.coverpage = coverpage;
 	}
 
 	public int getId() {
@@ -61,12 +61,12 @@ public class RoomDto {
 		this.description = description;
 	}
 
-	public int getCoverPage() {
-		return coverPage;
+	public int getCoverpage() {
+		return coverpage;
 	}
 
-	public void setCoverPage(int coverPage) {
-		this.coverPage = coverPage;
+	public void setCoverpage(int coverpage) {
+		this.coverpage = coverpage;
 	}
 
 	public int getOwner() {

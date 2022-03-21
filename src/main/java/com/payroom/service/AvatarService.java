@@ -6,9 +6,9 @@ import com.payroom.model.Avatar;
 
 public interface AvatarService {
 
-	public List<Avatar> findAvatarsList();
+	public List<Avatar> getAvatarsList();
 
-	public Avatar findAvatarById(int id);
+	public Avatar getAvatarById(int id);
 
 	public void saveAvatar(Avatar avatar);
 

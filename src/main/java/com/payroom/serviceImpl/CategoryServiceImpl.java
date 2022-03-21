@@ -18,14 +18,14 @@ public class CategoryServiceImpl implements CategoryService {
 	private CategoryDAO categoriesDAO;
 
 	@Override
-	public List<Category> findCategoriesList() {
-		List<Category> listCategories = categoriesDAO.findCategoriesList();
+	public List<Category> getCategoriesList() {
+		List<Category> listCategories = categoriesDAO.getCategoriesList();
 		return listCategories;
 	}
 
 	@Override
-	public Category findCategoryById(int id) {
-		Category category = categoriesDAO.findCategoryById(id);
+	public Category getCategoryById(int id) {
+		Category category = categoriesDAO.getCategoryById(id);
 		return category;
 	}
 

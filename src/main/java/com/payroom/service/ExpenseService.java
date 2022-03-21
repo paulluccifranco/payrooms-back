@@ -6,9 +6,9 @@ import com.payroom.model.Expense;
 
 public interface ExpenseService {
 
-	public List<Expense> findExpenseList();
+	public List<Expense> getExpenseList();
 
-	public Expense findExpenseById(int id);
+	public Expense getExpenseById(int id);
 
 	public int saveExpense(Expense expense);
 

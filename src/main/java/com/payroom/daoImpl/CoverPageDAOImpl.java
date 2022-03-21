@@ -9,51 +9,51 @@ import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.payroom.dao.CoverPageDAO;
-import com.payroom.model.CoverPage;
+import com.payroom.dao.CoverpageDAO;
+import com.payroom.model.Coverpage;
 
 @Repository
-public class CoverPageDAOImpl implements CoverPageDAO {
+public class CoverpageDAOImpl implements CoverpageDAO {
 
 	@Autowired
 	private EntityManager entityManager;
 
 	@Override
-	public List<CoverPage> findCoverPagesList() {
+	public List<Coverpage> getCoverpagesList() {
 		Session currentSession = entityManager.unwrap(Session.class);
 
-		Query<CoverPage> query = currentSession.createQuery("from CoverPage", CoverPage.class);
+		Query<Coverpage> query = currentSession.createQuery("from Coverpage", Coverpage.class);
 
-		List<CoverPage> coverPage = query.getResultList();
+		List<Coverpage> coverpage = query.getResultList();
 
-		return coverPage;
+		return coverpage;
 
 	}
 
 	@Override
-	public CoverPage findCoverPageById(int id) {
+	public Coverpage getCoverpageById(int id) {
 		Session currentSession = entityManager.unwrap(Session.class);
 
-		CoverPage coverPage = currentSession.get(CoverPage.class, id);
+		Coverpage coverpage = currentSession.get(Coverpage.class, id);
 
-		return coverPage;
+		return coverpage;
 	}
 
 	@Override
-	public void saveCoverPage(CoverPage coverPage) {
+	public void saveCoverpage(Coverpage coverpage) {
 		Session currentSession = entityManager.unwrap(Session.class);
 
-		currentSession.saveOrUpdate(coverPage);
+		currentSession.saveOrUpdate(coverpage);
 
 	}
 
 	@Override
-	public void deleteCoverPage(int id) {
+	public void deleteCoverpage(int id) {
 		Session currentSession = entityManager.unwrap(Session.class);
 
-		Query<CoverPage> query = currentSession.createQuery("delete from CoverPage where id=:idCoverPage");
+		Query<Coverpage> query = currentSession.createQuery("delete from Coverpage where id=:idCoverpage");
 
-		query.setParameter("idCoverPage", id);
+		query.setParameter("idCoverpage", id);
 		query.executeUpdate();
 
 	}

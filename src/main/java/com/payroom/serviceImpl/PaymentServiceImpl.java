@@ -18,14 +18,14 @@ public class PaymentServiceImpl implements PaymentService {
 	private PaymentDAO paymentDAO;
 
 	@Override
-	public List<Payment> findPaymentsList() {
-		List<Payment> listUsers = paymentDAO.findPaymentsList();
+	public List<Payment> getPaymentsList() {
+		List<Payment> listUsers = paymentDAO.getPaymentsList();
 		return listUsers;
 	}
 
 	@Override
-	public Payment findPaymentById(int id) {
-		Payment user = paymentDAO.findPaymentById(id);
+	public Payment getPaymentById(int id) {
+		Payment user = paymentDAO.getPaymentById(id);
 		return user;
 	}
 

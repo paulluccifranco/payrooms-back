@@ -15,7 +15,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -50,22 +49,12 @@ public class User {
 	@JsonProperty(access = Access.WRITE_ONLY)
 	private String password;
 
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH })
-	@JoinColumn(name = "avatar_id")
-	private Avatar avatar;
+	@Column(name = "user_avatar", length = 200)
+	private String avatar;
 
-	@OneToMany(mappedBy = "owner", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-			CascadeType.REFRESH })
+	@OneToMany(mappedBy = "user")
 	@JsonIgnore
-	private List<Room> ownRooms;
-
-	@ManyToMany(mappedBy = "users")
-	@JsonIgnore
-	private Set<Room> rooms;
-
-	@ManyToMany(mappedBy = "favoriteUsers")
-	@JsonIgnore
-	private List<Room> favoriteRooms;
+	private List<RoomUser> roomsUsers;
 
 	@OneToMany(mappedBy = "user", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
 			CascadeType.REFRESH })
@@ -88,6 +77,11 @@ public class User {
 	@Column(name = "user_state")
 	private int state = 1;
 
+	@OneToMany(mappedBy = "owner", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+			CascadeType.REFRESH })
+	@JsonIgnore
+	private List<Room> rooms;
+
 	@Column(name = "user_date")
 	@UpdateTimestamp
 	private Date date;
@@ -102,6 +96,9 @@ public class User {
 	@JsonIgnore
 	private List<Payment> paymentPayed;
 
+	@Column(name = "user_googleid")
+	private String googleId;
+
 	public User() {
 		super();
 	}
@@ -112,13 +109,25 @@ public class User {
 		this.username = username;
 	}
 
-	public User(String name, String lastname, String username, String email, String password, Avatar avatar) {
+	public User(String name, String lastname, String username, String email, String password, String avatar) {
 		super();
 		this.name = name;
 		this.lastname = lastname;
 		this.username = username;
 		this.email = email;
 		this.password = password;
+		this.avatar = avatar;
+	}
+
+	public User(String name, String lastname, String username, String email, String googleId, String password,
+			String avatar) {
+		super();
+		this.name = name;
+		this.lastname = lastname;
+		this.username = username;
+		this.email = email;
+		this.password = password;
+		this.googleId = googleId;
 		this.avatar = avatar;
 	}
 
@@ -170,46 +179,12 @@ public class User {
 		this.password = password;
 	}
 
-	public Avatar getAvatar() {
+	public String getAvatar() {
 		return avatar;
 	}
 
-	public void setAvatar(Avatar avatar) {
+	public void setAvatar(String avatar) {
 		this.avatar = avatar;
-	}
-
-	public List<Room> getOwnRooms() {
-		return ownRooms;
-	}
-
-	public void setOwnRooms(List<Room> ownRooms) {
-		this.ownRooms = ownRooms;
-	}
-
-	public Set<Room> getRooms() {
-		return rooms;
-	}
-
-	public void setRooms(Set<Room> rooms) {
-		this.rooms = rooms;
-	}
-
-	public void addRoom(Room theRoom) {
-		if (ownRooms == null) {
-			ownRooms = new ArrayList<>();
-		}
-
-		ownRooms.add(theRoom);
-
-		theRoom.setOwner(this);
-	}
-
-	public List<Room> getFavoriteRooms() {
-		return favoriteRooms;
-	}
-
-	public void setFavoriteRooms(List<Room> favoriteRooms) {
-		this.favoriteRooms = favoriteRooms;
 	}
 
 	public List<RoomLog> getRoomLogs() {
@@ -235,6 +210,14 @@ public class User {
 
 		friends.add(friend);
 
+	}
+
+	public List<RoomUser> getRoomsUsers() {
+		return roomsUsers;
+	}
+
+	public void setRoomsUsers(List<RoomUser> roomsUsers) {
+		this.roomsUsers = roomsUsers;
 	}
 
 	public List<Expense> getExpenses() {
@@ -301,10 +284,18 @@ public class User {
 		paymentRecieved.add(recieved);
 	}
 
+	public String getGoogleId() {
+		return googleId;
+	}
+
+	public void setGoogleId(String googleId) {
+		this.googleId = googleId;
+	}
+
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", name=" + name + ", lastname=" + lastname + ", username=" + username + ", password="
-				+ password + ", avatar=" + avatar.getId() + ", state=" + state + "]";
+				+ password + ", avatar=" + avatar + ", state=" + state + "]";
 	}
 
 }

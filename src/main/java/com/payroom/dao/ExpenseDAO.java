@@ -6,9 +6,9 @@ import com.payroom.model.Expense;
 
 public interface ExpenseDAO {
 
-	public List<Expense> findExpensesList();
+	public List<Expense> getExpensesList();
 
-	public Expense findExpenseById(int id);
+	public Expense getExpenseById(int id);
 
 	public int saveExpense(Expense expense);
 

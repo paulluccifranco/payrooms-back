@@ -37,7 +37,7 @@ public class FriendRestController {
 
 	@GetMapping("/friends/{userId}")
 	public List<User> getUserRooms(@PathVariable int userId) {
-		User user = usersService.findUserById(userId);
+		User user = usersService.getUserById(userId);
 
 		if (user == null) {
 			throw new RuntimeException("User id not found -" + userId);
@@ -55,8 +55,8 @@ public class FriendRestController {
 		try {
 			int userPayload = jsonWebTokenService.validateUserJWT(request);
 			if (userPayload == userId) {
-				User user = usersService.findUserById(userId);
-				User friend = usersService.findUserById(friendId);
+				User user = usersService.getUserById(userId);
+				User friend = usersService.getUserById(friendId);
 
 				user.addFriend(friend);
 
@@ -81,8 +81,8 @@ public class FriendRestController {
 		try {
 			int userPayload = jsonWebTokenService.validateUserJWT(request);
 			if (userId == userPayload || friendId == userPayload) {
-				User user = usersService.findUserById(userId);
-				User friend = usersService.findUserById(friendId);
+				User user = usersService.getUserById(userId);
+				User friend = usersService.getUserById(friendId);
 
 				if (user == null || friend == null) {
 					Response response = new Response("Data not found",

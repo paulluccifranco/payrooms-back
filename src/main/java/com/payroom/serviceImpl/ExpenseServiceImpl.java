@@ -18,14 +18,14 @@ public class ExpenseServiceImpl implements ExpenseService {
 	private ExpenseDAO expenseDAO;
 
 	@Override
-	public List<Expense> findExpenseList() {
-		List<Expense> listUsers = expenseDAO.findExpensesList();
+	public List<Expense> getExpenseList() {
+		List<Expense> listUsers = expenseDAO.getExpensesList();
 		return listUsers;
 	}
 
 	@Override
-	public Expense findExpenseById(int id) {
-		Expense user = expenseDAO.findExpenseById(id);
+	public Expense getExpenseById(int id) {
+		Expense user = expenseDAO.getExpenseById(id);
 		return user;
 	}
 

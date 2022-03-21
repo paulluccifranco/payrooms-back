@@ -19,7 +19,7 @@ public class CategoryDAOImpl implements CategoryDAO {
 	private EntityManager entityManager;
 
 	@Override
-	public List<Category> findCategoriesList() {
+	public List<Category> getCategoriesList() {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		Query<Category> query = currentSession.createQuery("from Category", Category.class);
@@ -31,7 +31,7 @@ public class CategoryDAOImpl implements CategoryDAO {
 	}
 
 	@Override
-	public Category findCategoryById(int id) {
+	public Category getCategoryById(int id) {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		Category category = currentSession.get(Category.class, id);

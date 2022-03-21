@@ -6,9 +6,9 @@ import com.payroom.model.Category;
 
 public interface CategoryDAO {
 
-	public List<Category> findCategoriesList();
+	public List<Category> getCategoriesList();
 
-	public Category findCategoryById(int id);
+	public Category getCategoryById(int id);
 
 	public void saveCategory(Category category);
 

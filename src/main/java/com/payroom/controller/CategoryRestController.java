@@ -24,7 +24,7 @@ public class CategoryRestController {
 	@GetMapping("/categories")
 	public List<Category> getCategoriesList() {
 
-		return categoryService.findCategoriesList();
+		return categoryService.getCategoriesList();
 	}
 
 }

@@ -6,13 +6,15 @@ import com.payroom.model.User;
 
 public interface UserService {
 
-	public List<User> findUsersList();
+	public List<User> getUsersList();
 
-	public User findUserById(int id);
+	public User getUserById(int id);
 
-	public User findUserByUsername(String usr);
+	public User getUserByUsername(String usr);
 
-	public List<User> findUsersByUsername(String usr);
+	public User getUserByGoogleId(String usr);
+
+	public List<User> getUsersByUsername(String usr);
 
 	public int saveUser(User user);
 

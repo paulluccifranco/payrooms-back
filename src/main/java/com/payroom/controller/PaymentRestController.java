@@ -55,7 +55,7 @@ public class PaymentRestController {
 
 	@GetMapping("/payments/{paymentId}")
 	public Payment getPayment(@PathVariable int paymentId) {
-		Payment payment = paymentService.findPaymentById(paymentId);
+		Payment payment = paymentService.getPaymentById(paymentId);
 
 		if (payment == null) {
 			throw new RuntimeException("Payment id not found -" + paymentId);
@@ -69,9 +69,9 @@ public class PaymentRestController {
 
 		try {
 			int payerId = jsonWebTokenService.validateUserJWT(request);
-			User reciever = userService.findUserById(recieverId);
-			User payer = userService.findUserById(payerId);
-			Room room = roomService.findRoomById(roomId);
+			User reciever = userService.getUserById(recieverId);
+			User payer = userService.getUserById(payerId);
+			Room room = roomService.getRoomById(roomId);
 
 			if (reciever == null || payer == null) {
 				return new ResponseEntity<>("Usuario no encontrado", HttpStatus.BAD_REQUEST);
@@ -104,7 +104,7 @@ public class PaymentRestController {
 	@DeleteMapping("payments/{paymentId}")
 	public String detetePayment(@PathVariable int paymentId) {
 
-		Payment payment = paymentService.findPaymentById(paymentId);
+		Payment payment = paymentService.getPaymentById(paymentId);
 
 		if (payment == null) {
 			throw new RuntimeException("Payment id not found -" + paymentId);
