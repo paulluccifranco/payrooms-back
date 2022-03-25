@@ -30,6 +30,10 @@ public class Coverpage {
 	@JsonIgnore
 	private List<Room> rooms;
 
+	@Column(name = "coverpage_stock")
+	@JsonIgnore
+	private Boolean isStock;
+
 	public Coverpage() {
 		super();
 	}
@@ -61,6 +65,14 @@ public class Coverpage {
 
 	public void setRooms(List<Room> rooms) {
 		this.rooms = rooms;
+	}
+
+	public Boolean getIsStock() {
+		return isStock;
+	}
+
+	public void setIsStock(Boolean isStock) {
+		this.isStock = isStock;
 	}
 
 	@Override

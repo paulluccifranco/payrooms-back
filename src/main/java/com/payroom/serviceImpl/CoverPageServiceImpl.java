@@ -30,8 +30,8 @@ public class CoverpageServiceImpl implements CoverpageService {
 	}
 
 	@Override
-	public void saveCoverpage(Coverpage coverpage) {
-		coverpagesDAO.saveCoverpage(coverpage);
+	public int saveCoverpage(Coverpage coverpage) {
+		return coverpagesDAO.saveCoverpage(coverpage);
 
 	}
 

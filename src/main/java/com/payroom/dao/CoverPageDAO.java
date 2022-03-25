@@ -10,7 +10,7 @@ public interface CoverpageDAO {
 
 	public Coverpage getCoverpageById(int id);
 
-	public void saveCoverpage(Coverpage coverpage);
+	public int saveCoverpage(Coverpage coverpage);
 
 	public void deleteCoverpage(int id);
 

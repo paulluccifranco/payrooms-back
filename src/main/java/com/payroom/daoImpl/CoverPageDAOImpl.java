@@ -22,7 +22,7 @@ public class CoverpageDAOImpl implements CoverpageDAO {
 	public List<Coverpage> getCoverpagesList() {
 		Session currentSession = entityManager.unwrap(Session.class);
 
-		Query<Coverpage> query = currentSession.createQuery("from Coverpage", Coverpage.class);
+		Query<Coverpage> query = currentSession.createQuery("from Coverpage where isStock = true", Coverpage.class);
 
 		List<Coverpage> coverpage = query.getResultList();
 
@@ -40,11 +40,12 @@ public class CoverpageDAOImpl implements CoverpageDAO {
 	}
 
 	@Override
-	public void saveCoverpage(Coverpage coverpage) {
+	public int saveCoverpage(Coverpage coverpage) {
 		Session currentSession = entityManager.unwrap(Session.class);
 
 		currentSession.saveOrUpdate(coverpage);
 
+		return coverpage.getId();
 	}
 
 	@Override
