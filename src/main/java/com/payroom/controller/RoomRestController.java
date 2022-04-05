@@ -94,6 +94,50 @@ public class RoomRestController {
 		}
 	}
 
+	@GetMapping("/sharedroom/{roomJWT}")
+	public ResponseEntity<Object> getRoomDecoded(@PathVariable String roomJWT) {
+		int roomId = jsonWebTokenService.validateRoomJWT(roomJWT);
+
+		Room room = roomService.getRoomById(roomId);
+
+		if (room == null) {
+			Response response = new Response("Data not found", "Los datos no estan cargados en la base");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+		} else {
+			List<RoomUser> roomsUsers = room.getRoomUsers();
+			RoomUserDto roomUserDto = new RoomUserDto(room.getId(), room.getName(), room.getDescription(),
+					room.getCoverpage());
+			roomUserDto.setDate(room.getDate());
+			List<UserRoomDto> users = new ArrayList<UserRoomDto>();
+			for (RoomUser userRoom : roomsUsers) {
+				UserRoomDto userDto = new UserRoomDto(userRoom.getUser().getId(), userRoom.getUser().getName(),
+						userRoom.getUser().getLastname(), userRoom.getUser().getUsername(),
+						userRoom.getUser().getEmail(), userRoom.getUser().getAvatar());
+				userDto.setAdmin(userRoom.getIsAdmin());
+				userDto.setActive(userRoom.getState());
+				users.add(userDto);
+			}
+			roomUserDto.setActive(true);
+			roomUserDto.setOwner(room.getOwner().getId());
+			roomUserDto.setExpenses(room.getExpenses());
+			roomUserDto.setUsers(users);
+			return new ResponseEntity<>(roomUserDto, HttpStatus.OK);
+		}
+	}
+
+	@GetMapping("/rooms/sharedlink/{roomId}")
+	public ResponseEntity<Object> getRoomJWT(@PathVariable int roomId) {
+		Room room = roomService.getRoomById(roomId);
+
+		if (room == null) {
+			Response response = new Response("Data not found", "Los datos no estan cargados en la base");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+		} else {
+			String token = jsonWebTokenService.generateRoomJWT("" + roomId);
+			return new ResponseEntity<>(token, HttpStatus.OK);
+		}
+	}
+
 	@GetMapping("/rooms/{roomId}/users")
 	public ResponseEntity<?> getRoomUsers(@PathVariable int roomId) {
 		Room room = roomService.getRoomById(roomId);

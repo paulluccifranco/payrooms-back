@@ -51,10 +51,10 @@ public class UserRestController {
 	private AvatarService avatarsService;
 
 	@Autowired
-	JsonWebTokenService jsonWebTokenService;
+	private JsonWebTokenService jsonWebTokenService;
 
 	@Autowired
-	GoogleWebService googleService;
+	private GoogleWebService googleService;
 
 	@GetMapping("/users")
 	public List<User> getUsersList() {

@@ -51,4 +51,33 @@ public class JsonWebTokenService {
 		return userId;
 	}
 
+	public String generateRoomJWT(String roomId) {
+		String secretKey = "mySecretKey";
+		List<GrantedAuthority> grantedAuthorities = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER");
+
+		String token = Jwts.builder().setId("expensesJWT").setSubject(roomId)
+				.claim("authorities",
+						grantedAuthorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))
+				.signWith(SignatureAlgorithm.HS512, secretKey.getBytes()).compact();
+
+		return token;
+	}
+
+	public int validateRoomJWT(String token) {
+		int roomId = 0;
+		if (token != null) {
+			String room = Jwts.parser().setSigningKey(SECRET.getBytes()).parseClaimsJws(token.replace(PREFIX, ""))
+					.getBody().getSubject();
+
+			if (room != null) {
+				roomId = Integer.parseInt(room);
+				return roomId;
+			}
+			return roomId;
+		}
+		return roomId;
+	}
+
 }
