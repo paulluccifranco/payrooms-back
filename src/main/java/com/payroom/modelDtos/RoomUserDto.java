@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.payroom.model.Coverpage;
 import com.payroom.model.Expense;
+import com.payroom.model.Payment;
 
 public class RoomUserDto {
 
@@ -19,6 +20,7 @@ public class RoomUserDto {
 	private List<UserRoomDto> users;
 	private Date date;
 	private List<Expense> expenses;
+	private List<Payment> payments;
 	private Boolean active;
 	private Date lastUpdate;
 
@@ -153,6 +155,14 @@ public class RoomUserDto {
 
 	public void setActive(Boolean active) {
 		this.active = active;
+	}
+
+	public List<Payment> getPayments() {
+		return payments;
+	}
+
+	public void setPayments(List<Payment> payments) {
+		this.payments = payments;
 	}
 
 }

@@ -89,6 +89,7 @@ public class RoomRestController {
 			roomUserDto.setActive(true);
 			roomUserDto.setOwner(room.getOwner().getId());
 			roomUserDto.setExpenses(room.getExpenses());
+			roomUserDto.setPayments(room.getRoomPayments());
 			roomUserDto.setUsers(users);
 			return new ResponseEntity<>(roomUserDto, HttpStatus.OK);
 		}
