@@ -97,7 +97,46 @@ public class UserRestController {
 		List<RoomUserDto> rooms = new ArrayList<>();
 		List<RoomUser> roomsUsers = user.getRoomsUsers();
 		for (RoomUser roomUser : roomsUsers) {
-			if (roomUser.getState()) {
+			if (roomUser.getState().equals(RoomUser.State.NORMAL)) {
+				RoomUserDto room = new RoomUserDto(roomUser.getRoom().getId(), roomUser.getRoom().getName(),
+						roomUser.getRoom().getDescription(), roomUser.getRoom().getCoverpage());
+				room.setIsFavorite(roomUser.getIsFavorite());
+				room.setDate(roomUser.getRoom().getDate());
+				if (roomUser.getIsAdmin()) {
+					room.setOwner(roomUser.getRoom().getOwner().getId());
+				}
+				List<UserRoomDto> users = new ArrayList<UserRoomDto>();
+				Room roomOne = roomUser.getRoom();
+				List<RoomUser> userRooms = roomOne.getRoomUsers();
+				for (RoomUser usr : userRooms) {
+					UserRoomDto userDto = new UserRoomDto(usr.getUser().getId(), usr.getUser().getName(),
+							usr.getUser().getLastname(), usr.getUser().getUsername(), usr.getUser().getEmail(),
+							usr.getUser().getAvatar());
+					users.add(userDto);
+				}
+				room.setLastUpdate(roomOne.getLastUpdate());
+				room.setUsers(users);
+				rooms.add(room);
+			}
+		}
+
+		// Collections.reverse(rooms);
+
+		return rooms;
+	}
+
+	@GetMapping("/users/rooms/archived")
+	public List<RoomUserDto> getUserRoomsArchived(HttpServletRequest request) {
+		int userId = jsonWebTokenService.validateUserJWT(request);
+		User user = usersService.getUserById(userId);
+
+		if (user == null) {
+			throw new RuntimeException("User id not found -" + userId);
+		}
+		List<RoomUserDto> rooms = new ArrayList<>();
+		List<RoomUser> roomsUsers = user.getRoomsUsers();
+		for (RoomUser roomUser : roomsUsers) {
+			if (roomUser.getState().equals(RoomUser.State.ARCHIVED)) {
 				RoomUserDto room = new RoomUserDto(roomUser.getRoom().getId(), roomUser.getRoom().getName(),
 						roomUser.getRoom().getDescription(), roomUser.getRoom().getCoverpage());
 				room.setIsFavorite(roomUser.getIsFavorite());

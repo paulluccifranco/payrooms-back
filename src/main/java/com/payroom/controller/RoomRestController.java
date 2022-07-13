@@ -1,7 +1,6 @@
 package com.payroom.controller;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -36,8 +36,8 @@ import com.payroom.service.UserService;
 import com.payroom.util.Email;
 
 @RestController
-@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.PUT, RequestMethod.POST,
-		RequestMethod.DELETE })
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.PUT, RequestMethod.POST, RequestMethod.DELETE,
+		RequestMethod.PATCH })
 @RequestMapping("/api/v1.0")
 
 public class RoomRestController {
@@ -83,7 +83,7 @@ public class RoomRestController {
 						userRoom.getUser().getLastname(), userRoom.getUser().getUsername(),
 						userRoom.getUser().getEmail(), userRoom.getUser().getAvatar());
 				userDto.setAdmin(userRoom.getIsAdmin());
-				userDto.setActive(userRoom.getState());
+				userDto.setActive(userRoom.getState().equals(RoomUser.State.NORMAL) ? true : false);
 				users.add(userDto);
 			}
 			roomUserDto.setActive(true);
@@ -115,7 +115,7 @@ public class RoomRestController {
 						userRoom.getUser().getLastname(), userRoom.getUser().getUsername(),
 						userRoom.getUser().getEmail(), userRoom.getUser().getAvatar());
 				userDto.setAdmin(userRoom.getIsAdmin());
-				userDto.setActive(userRoom.getState());
+				userDto.setActive(userRoom.getState().equals(RoomUser.State.NORMAL) ? true : false);
 				users.add(userDto);
 			}
 			roomUserDto.setActive(true);
@@ -197,7 +197,7 @@ public class RoomRestController {
 
 			roomService.saveRoom(room);
 
-			RoomUser roomUser = new RoomUser(room, owner, true, false, true);
+			RoomUser roomUser = new RoomUser(room, owner, RoomUser.State.NORMAL, false, true);
 			roomUser.setId(0);
 			roomUserService.saveRoomUser(roomUser);
 
@@ -225,7 +225,7 @@ public class RoomRestController {
 				Response response = new Response("Duplicated user", "El usuario ya se encuentra en esta sala");
 				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 			} else {
-				roomUser = new RoomUser(room, user, true, false, false);
+				roomUser = new RoomUser(room, user, RoomUser.State.NORMAL, false, false);
 				roomUser.setId(0);
 				roomUserService.saveRoomUser(roomUser);
 				try {
@@ -298,8 +298,8 @@ public class RoomRestController {
 
 	}
 
-	@DeleteMapping("rooms/{roomId}")
-	public ResponseEntity<Object> deteteRoom(HttpServletRequest request, @PathVariable int roomId) {
+	@PatchMapping("rooms/{roomId}")
+	public ResponseEntity<Object> archiveRoom(HttpServletRequest request, @PathVariable int roomId) {
 
 		try {
 			Room room = roomService.getRoomById(roomId);
@@ -312,10 +312,11 @@ public class RoomRestController {
 				User user = userService.getUserById(userId);
 				RoomUser roomUser = roomUserService.getRoomUserByUserRoom(user, room);
 				if (roomUser.getIsAdmin()) {
-					room.setActive(false);
-					room.setDate(new Date());
-
-					roomService.saveRoom(room);
+					List<RoomUser> roomUsers = roomUserService.getRoomUserByRoom(room);
+					for (RoomUser ru : roomUsers) {
+						ru.setState(RoomUser.State.ARCHIVED);
+						roomUserService.saveRoomUser(roomUser);
+					}
 
 					Response response = new Response("Room state change", "La sala fue dada de baja con exito");
 					return new ResponseEntity<>(response, HttpStatus.OK);
@@ -348,7 +349,40 @@ public class RoomRestController {
 				User user = userService.getUserById(userId);
 				RoomUser roomUser = roomUserService.getRoomUserByUserRoom(user, room);
 				if (roomUser != null) {
-					roomUser.setState(false);
+					roomUser.setState(RoomUser.State.ARCHIVED);
+					roomUserService.saveRoomUser(roomUser);
+
+					Response response = new Response("User deleted from room", "El usuario ya no pertenece a la sala");
+					return new ResponseEntity<>(response, HttpStatus.OK);
+				} else {
+					Response response = new Response("User not found", "El usuario no pertencece a la sala");
+					return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+				}
+
+			}
+
+		} catch (Exception ex) {
+			Response failResponse = new Response("" + ex, "Los datos recibidos no son correctos");
+			return new ResponseEntity<>(failResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+
+		}
+	}
+
+	@PatchMapping("rooms/{roomId}/user")
+	public ResponseEntity<Object> desArchiveUserroom(HttpServletRequest request, @PathVariable int roomId) {
+
+		try {
+			Room room = roomService.getRoomById(roomId);
+
+			if (room == null) {
+				Response response = new Response("Room not found", "La sala no se encuentra en la base de datos");
+				return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+			} else {
+				int userId = jsonWebTokenService.validateUserJWT(request);
+				User user = userService.getUserById(userId);
+				RoomUser roomUser = roomUserService.getRoomUserByUserRoom(user, room);
+				if (roomUser != null) {
+					roomUser.setState(RoomUser.State.NORMAL);
 					roomUserService.saveRoomUser(roomUser);
 
 					Response response = new Response("User deleted from room", "El usuario ya no pertenece a la sala");

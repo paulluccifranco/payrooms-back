@@ -3,6 +3,8 @@ package com.payroom.model;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,6 +15,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "rooms_users")
 public class RoomUser {
+
+	public enum State {
+		NORMAL, ARCHIVED, DELETED;
+	}
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +31,8 @@ public class RoomUser {
 	@JoinColumn(name = "user_id")
 	private User user;
 	@Column(name = "state")
-	private Boolean state;
+	@Enumerated(EnumType.STRING)
+	private State state;
 	@Column(name = "favorite")
 	private Boolean isFavorite;
 	@Column(name = "admin")
@@ -35,7 +42,7 @@ public class RoomUser {
 		super();
 	}
 
-	public RoomUser(Room room, User user, Boolean state, Boolean favorite, Boolean isAdmin) {
+	public RoomUser(Room room, User user, State state, Boolean favorite, Boolean isAdmin) {
 		super();
 		this.room = room;
 		this.user = user;
@@ -68,11 +75,11 @@ public class RoomUser {
 		this.user = user;
 	}
 
-	public Boolean getState() {
+	public State getState() {
 		return state;
 	}
 
-	public void setState(Boolean state) {
+	public void setState(State state) {
 		this.state = state;
 	}
 

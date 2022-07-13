@@ -14,6 +14,8 @@ public interface RoomUserDAO {
 
 	public RoomUser getRoomUserByUserRoom(User user, Room room);
 
+	public List<RoomUser> getRoomUserByRoom(Room room);
+
 	public int saveRoomUser(RoomUser roomUser);
 
 	public void deleteRoomUser(int id);

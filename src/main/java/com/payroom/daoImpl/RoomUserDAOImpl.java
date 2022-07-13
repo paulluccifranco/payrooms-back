@@ -48,6 +48,16 @@ public class RoomUserDAOImpl implements RoomUserDAO {
 	}
 
 	@Override
+	public List<RoomUser> getRoomUserByRoom(Room room) {
+		Session currentSession = entityManager.unwrap(Session.class);
+		Query<RoomUser> query = currentSession.createQuery("from RoomUser WHERE room=:room", RoomUser.class);
+		query.setParameter("room", room);
+		List<RoomUser> roomUser = query.list();
+
+		return roomUser;
+	}
+
+	@Override
 	public int saveRoomUser(RoomUser roomUser) {
 		Session currentSession = entityManager.unwrap(Session.class);
 		currentSession.saveOrUpdate(roomUser);

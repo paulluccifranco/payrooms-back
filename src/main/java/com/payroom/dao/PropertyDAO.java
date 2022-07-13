@@ -1,7 +1,11 @@
 package com.payroom.dao;
 
-public interface PropertyDAO {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-	public String getPropertyByName(String name);
+import com.payroom.model.Property;
+
+@Repository
+public interface PropertyDAO extends JpaRepository<Property, String> {
 
 }

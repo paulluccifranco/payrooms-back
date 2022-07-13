@@ -48,4 +48,10 @@ public class RoomUserServiceImpl implements RoomUserService {
 		roomUserDAO.deleteRoomUser(id);
 
 	}
+
+	@Override
+	public List<RoomUser> getRoomUserByRoom(Room room) {
+		roomUserDAO.getRoomUserByRoom(room);
+		return null;
+	}
 }

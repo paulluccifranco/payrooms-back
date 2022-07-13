@@ -2,8 +2,6 @@ package com.payroom.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -12,30 +10,26 @@ import javax.persistence.Table;
 public class Property {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private int id;
-	@Column(name = "name")
-	private String name;
-	@Column(name = "value")
+	@Column(name = "property", nullable = false, length = 50)
+	private String property;
 	private String value;
 
 	public Property() {
 		super();
 	}
 
-	public Property(String name, String value) {
+	public Property(String property, String value) {
 		super();
-		this.name = name;
+		this.property = property;
 		this.value = value;
 	}
 
-	public String getName() {
-		return name;
+	public String getProperty() {
+		return property;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setProperty(String property) {
+		this.property = property;
 	}
 
 	public String getValue() {
